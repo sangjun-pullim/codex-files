@@ -1,0 +1,199 @@
+#!/bin/sh
+set -eu
+
+claude_root="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+codex_root="${CODEX_CONFIG_DIR:-$HOME/.codex}"
+migrator="$codex_root/skills/migrate-to-codex/scripts/migrate-to-codex.py"
+python_bin="${PYTHON3_BIN:-/opt/homebrew/bin/python3}"
+
+ensure_codex_config() {
+  config_file="$1"
+  [ -f "$config_file" ] || return 0
+
+  if grep -q '^codex_hooks[[:space:]]*=' "$config_file"; then
+    temp_file="${config_file}.sync-tmp"
+    cp -p "$config_file" "$temp_file"
+    sed 's/^codex_hooks\([[:space:]]*=\)/hooks\1/' "$config_file" > "$temp_file"
+    mv "$temp_file" "$config_file"
+  fi
+  if ! grep -q '^project_doc_fallback_filenames[[:space:]]*=' "$config_file"; then
+    temp_file="${config_file}.sync-tmp"
+    cp -p "$config_file" "$temp_file"
+    awk '
+      !inserted && /^\[/ {
+        print "project_doc_fallback_filenames = [\"CLAUDE.md\"]"
+        print ""
+        inserted = 1
+      }
+      { print }
+      END {
+        if (!inserted) {
+          print ""
+          print "project_doc_fallback_filenames = [\"CLAUDE.md\"]"
+        }
+      }
+    ' "$config_file" > "$temp_file"
+    mv "$temp_file" "$config_file"
+  fi
+}
+
+link_claude_rules() {
+  target_root="$1"
+  [ -d "$claude_root/rules" ] || return 0
+  mkdir -p "$target_root/rules"
+  for source_rule in "$claude_root"/rules/*.md; do
+    [ -f "$source_rule" ] || continue
+    target_rule="$target_root/rules/$(basename "$source_rule")"
+    if [ -d "$target_rule" ] && [ ! -L "$target_rule" ]; then
+      echo "Refusing to replace directory with rule link: $target_rule" >&2
+      exit 1
+    fi
+    ln -sfn "$source_rule" "$target_rule"
+  done
+}
+
+rewrite_skill_arguments() {
+  source_dir="$1"
+  target_skill="$HOME/.agents/skills/$(basename "$source_dir")/SKILL.md"
+  [ -f "$target_skill" ] || return 0
+  perl -0pi -e '
+    s/\$ARGUMENTS/the user-provided invocation text/g;
+    s/^the user-provided invocation text$/Apply any user-provided invocation text as additional task context./mg;
+  ' "$target_skill"
+}
+
+if [ ! -f "$migrator" ]; then
+  echo "Missing migrator: $migrator" >&2
+  exit 1
+fi
+
+if ! "$python_bin" -c 'import tomllib' >/dev/null 2>&1; then
+  echo "Python 3.11+ with tomllib is required: $python_bin" >&2
+  exit 1
+fi
+
+write_mode=true
+scan_only=false
+for arg in "$@"; do
+  case "$arg" in
+    --scan-only)
+      write_mode=false
+      scan_only=true
+      ;;
+    -h|--help|--plan|--doctor|--dry-run|--validate-target) write_mode=false ;;
+  esac
+done
+
+if [ "$scan_only" = true ]; then
+  "$python_bin" "$migrator" --source "$claude_root/" "$@"
+else
+  "$python_bin" "$migrator" --source "$claude_root/" --target "$codex_root/" --skills --subagents "$@"
+fi
+
+# The upstream migrator may carry Claude-only model identifiers into Codex.
+# Let Codex use its configured/default model instead of copying provider-specific IDs.
+if [ "$write_mode" = true ]; then
+  for generated_file in "$codex_root/config.toml" "$codex_root"/agents/*.toml; do
+    [ -f "$generated_file" ] || continue
+    temp_file="${generated_file}.sync-tmp"
+    cp -p "$generated_file" "$temp_file"
+    awk '!/^[[:space:]]*model[[:space:]]*=[[:space:]]*"(claude-|opus|sonnet|haiku)/' "$generated_file" > "$temp_file"
+    mv "$temp_file" "$generated_file"
+  done
+
+  # Codex skills receive the user's invocation text directly; Claude's
+  # $ARGUMENTS placeholder is not expanded by the Codex skill runtime.
+  for source_skill in "$claude_root"/skills/*; do
+    [ -f "$source_skill/SKILL.md" ] || continue
+    rewrite_skill_arguments "$source_skill"
+  done
+
+  # The placeholder warning is resolved by the rewrite above. Keep other
+  # migration warnings intact because they still require semantic review.
+  for source_command in "$claude_root"/commands/*.md; do
+    [ -f "$source_command" ] || continue
+    command_name="$(basename "$source_command" .md)"
+    command_skill="$HOME/.agents/skills/source-command-$command_name/SKILL.md"
+    [ -f "$command_skill" ] || continue
+    perl -0pi -e '
+      s/\$ARGUMENTS/the user-provided invocation text/g;
+      s/^the user-provided invocation text$/Apply any user-provided invocation text as additional task context./mg;
+    ' "$command_skill"
+    perl -0pi -e 's/\n## MANUAL MIGRATION REQUIRED\n.*\z/\n/s' "$command_skill"
+  done
+
+  # Planner/reviewer only inspect and report; enforce the source tool intent
+  # with Codex's native read-only sandbox and remove the resolved warning.
+  for generated_agent in "$codex_root"/agents/planner.toml "$codex_root"/agents/reviewer.toml; do
+    [ -f "$generated_agent" ] || continue
+    if ! grep -q '^sandbox_mode[[:space:]]*=' "$generated_agent"; then
+      temp_file="${generated_agent}.sync-tmp"
+      cp -p "$generated_agent" "$temp_file"
+      awk '
+        { print }
+        !inserted && /^description[[:space:]]*=/ {
+          print "sandbox_mode = \"read-only\""
+          inserted = 1
+        }
+      ' "$generated_agent" > "$temp_file"
+      mv "$temp_file" "$generated_agent"
+    fi
+    perl -0pi -e 's/\n## Tools\n.*?"""\s*\z/\n"""\n/s' "$generated_agent"
+  done
+
+  # Generate provider-specific global guidance without editing the Claude source.
+  agents_temp="$codex_root/AGENTS.md.sync-tmp"
+  cp "$claude_root/CLAUDE.md" "$agents_temp"
+  perl -0pi -e '
+    s/^# Global CLAUDE\.md$/# Global AGENTS.md/m;
+    s/the project.s CLAUDE\.md/the project\x27s AGENTS.md (or fallback CLAUDE.md)/g;
+    s/config → `~\/\.claude\/`/config → `~\/\.codex\/`/g;
+    s/`rules\//`~\/.codex\/rules\//g;
+    s/"add this to CLAUDE\.md"/"add this to AGENTS.md"/g;
+    s/immediately propose which file\/section to update/immediately propose updating the canonical `~\/.claude\/CLAUDE.md` source and identify the section/g;
+    s/a CLAUDE\.md update/an update to the canonical `~\/.claude\/CLAUDE.md` source/g;
+    s/When modifying any CLAUDE\.md/When modifying the canonical `~\/.claude\/CLAUDE.md` source/g;
+  ' "$agents_temp"
+  agents_with_notice="$codex_root/AGENTS.md.notice-tmp"
+  {
+    echo '<!-- Generated from ~/.claude/CLAUDE.md. Do not edit this file directly.'
+    echo '     Make durable shared changes in ~/.claude/CLAUDE.md, then run ~/.codex/bin/sync-from-claude. -->'
+    echo
+    cat "$agents_temp"
+  } > "$agents_with_notice"
+  mv "$agents_with_notice" "$agents_temp"
+  mv "$agents_temp" "$codex_root/AGENTS.md"
+  link_claude_rules "$codex_root"
+  ensure_codex_config "$codex_root/config.toml"
+
+  hooks_sync="$codex_root/bin/sync-codex-hooks.py"
+  if [ -f "$codex_root/hooks.json" ] && [ -f "$hooks_sync" ]; then
+    "$python_bin" "$hooks_sync" \
+      --hooks-file "$codex_root/hooks.json" \
+      --hooks-dir "$codex_root/hooks"
+  fi
+
+  # Orca owns a separate runtime CODEX_HOME for account/session isolation.
+  # Keep its instruction surfaces linked to the user-level Codex source.
+  active_codex_root="${ORCA_CODEX_HOME:-}"
+  if [ -n "$active_codex_root" ] && [ "$active_codex_root" != "$codex_root" ]; then
+    if [ -d "$active_codex_root/AGENTS.md" ] && [ ! -L "$active_codex_root/AGENTS.md" ]; then
+      echo "Refusing to replace directory with AGENTS.md link: $active_codex_root/AGENTS.md" >&2
+      exit 1
+    fi
+    ln -sfn "$codex_root/AGENTS.md" "$active_codex_root/AGENTS.md"
+    link_claude_rules "$active_codex_root"
+    if [ -d "$active_codex_root/agents" ] && [ ! -L "$active_codex_root/agents" ]; then
+      echo "Refusing to replace existing agents directory: $active_codex_root/agents" >&2
+      exit 1
+    fi
+    ln -sfn "$codex_root/agents" "$active_codex_root/agents"
+    ensure_codex_config "$active_codex_root/config.toml"
+    if [ -f "$codex_root/hooks.json" ] && [ -f "$active_codex_root/hooks.json" ] && [ -f "$hooks_sync" ]; then
+      "$python_bin" "$hooks_sync" \
+        --hooks-file "$codex_root/hooks.json" \
+        --hooks-dir "$codex_root/hooks" \
+        --active-file "$active_codex_root/hooks.json"
+    fi
+  fi
+fi

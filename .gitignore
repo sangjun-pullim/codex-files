@@ -1,0 +1,31 @@
+# Codex stores both authored configuration and runtime state in this directory.
+# Track only the explicitly approved, portable configuration surfaces below.
+*
+
+!.gitignore
+!README.md
+!AGENTS.md
+!config.toml
+!*.config.toml
+!hooks.json
+
+!agents/
+!agents/**
+
+!bin/
+!bin/**
+
+!hooks/
+!hooks/**
+
+!rules/
+!rules/**
+
+!skills/
+!skills/migrate-to-codex/
+!skills/migrate-to-codex/**
+
+**/__pycache__/
+*.py[cod]
+*.bak
+*.sync-tmp
