@@ -8,3 +8,27 @@ status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "
 
 [features]
 hooks = true
+
+[hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:0:0"]
+enabled = true
+trusted_hash = "sha256:81d639745c893712bed8af5c768a5f10e3131c8ece334fe48eb53f4e34a06a88"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:1:0"]
+enabled = true
+trusted_hash = "sha256:07521182f20052fa3a8d2de345fe445baff39e1a5a05e98d111731c323168c20"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:2:0"]
+enabled = true
+trusted_hash = "sha256:576788615cdcaf5f458bccffcc17d66a5e3480059c7842d678ea352bd509181a"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:post_tool_use:0:0"]
+enabled = true
+trusted_hash = "sha256:91f0a89f6fe6442ae91d8353b83cba62f28a2a160cdd190f9e85f5cd5890036f"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:user_prompt_submit:0:0"]
+enabled = true
+trusted_hash = "sha256:28d6d67f056aabc5ef0ea518f05973cf2ad61be989d75c734795d4761e09fe39"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:stop:0:0"]
+enabled = true
+trusted_hash = "sha256:64b29e11a13c7a261e5132ab623c58f5aab967a7c777023f9bc3f40ce7ebed5f"
