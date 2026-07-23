@@ -32,3 +32,6 @@ trusted_hash = "sha256:28d6d67f056aabc5ef0ea518f05973cf2ad61be989d75c734795d4761
 [hooks.state."/Users/pullim/.codex/hooks.json:stop:0:0"]
 enabled = true
 trusted_hash = "sha256:64b29e11a13c7a261e5132ab623c58f5aab967a7c777023f9bc3f40ce7ebed5f"
+
+[projects."/Users/pullim/Documents/workspace/luxury-collector"]
+trust_level = "trusted"
