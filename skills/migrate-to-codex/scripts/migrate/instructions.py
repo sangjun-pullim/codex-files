@@ -59,23 +59,27 @@ def should_symlink_instructions(content: str) -> bool:
 
 def validate_agents_md_files(target_root: Path) -> list[MigrationReportItem]:
     report_items: list[MigrationReportItem] = []
-    for agents_file in sorted(target_root.rglob("AGENTS.md")):
-        relative_path = agents_file.relative_to(target_root)
-        size_bytes = agents_file.stat().st_size
-        if size_bytes > MAX_AGENTS_MD_BYTES:
-            report_items.append(
-                MigrationReportItem(
-                    "warning",
-                    relative_path,
-                    f"{size_bytes / 1024:.1f}KB exceeds the 32KB review threshold.",
-                )
-            )
-            continue
+    agents_file = target_root / "AGENTS.md"
+    if not agents_file.exists():
+        return report_items
+
+    relative_path = agents_file.relative_to(target_root)
+    size_bytes = agents_file.stat().st_size
+    if size_bytes > MAX_AGENTS_MD_BYTES:
         report_items.append(
             MigrationReportItem(
-                "ok",
+                "warning",
                 relative_path,
-                f"{size_bytes / 1024:.1f}KB is under the 32KB review threshold.",
+                f"{size_bytes / 1024:.1f}KB exceeds the 32KB review threshold.",
             )
         )
+        return report_items
+
+    report_items.append(
+        MigrationReportItem(
+            "ok",
+            relative_path,
+            f"{size_bytes / 1024:.1f}KB is under the 32KB review threshold.",
+        )
+    )
     return report_items

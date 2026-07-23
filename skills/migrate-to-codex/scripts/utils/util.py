@@ -102,8 +102,12 @@ def parse_yaml_mapping(content: str) -> dict[str, YamlValue]:
     """Parse the small YAML-frontmatter subset used by Claude metadata."""
     result: dict[str, YamlValue] = {}
     current_key: str | None = None
+    lines = content.splitlines()
+    index = 0
 
-    for raw_line in content.splitlines():
+    while index < len(lines):
+        raw_line = lines[index]
+        index += 1
         if not raw_line.strip():
             continue
 
@@ -121,9 +125,45 @@ def parse_yaml_mapping(content: str) -> dict[str, YamlValue]:
 
         current_key = key.strip()
         value = value.strip()
+        if value in {">", ">-", "|", "|-"}:
+            block_lines: list[str] = []
+            while index < len(lines):
+                block_line = lines[index]
+                if block_line and not block_line[0].isspace():
+                    break
+                block_lines.append(block_line)
+                index += 1
+            result[current_key] = parse_yaml_block_scalar(value, block_lines)
+            continue
         result[current_key] = parse_yaml_value(value) if value else []
 
     return result
+
+
+def parse_yaml_block_scalar(style: str, lines: list[str]) -> str:
+    indentation = min(
+        (len(line) - len(line.lstrip()) for line in lines if line.strip()),
+        default=0,
+    )
+    normalized = [line[indentation:] if line else "" for line in lines]
+
+    if style.startswith(">"):
+        paragraphs: list[str] = []
+        paragraph: list[str] = []
+        for line in normalized:
+            if line:
+                paragraph.append(line.strip())
+                continue
+            if paragraph:
+                paragraphs.append(" ".join(paragraph))
+                paragraph = []
+        if paragraph:
+            paragraphs.append(" ".join(paragraph))
+        value = "\n".join(paragraphs)
+    else:
+        value = "\n".join(normalized)
+
+    return value if style.endswith("-") else f"{value}\n"
 
 
 def parse_yaml_value(value: str) -> YamlValue:
