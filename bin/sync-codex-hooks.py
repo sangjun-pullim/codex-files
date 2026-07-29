@@ -40,6 +40,9 @@ def commands(group: HookGroup) -> list[str]:
 def adapt_user_hooks(data: dict[str, Any], hooks_dir: Path) -> None:
     event_groups = data.get("hooks", {})
     env_command = f"/bin/sh {shlex.quote(str(hooks_dir / 'block-env-read.sh'))}"
+    auto_format_command = (
+        f"/bin/bash {shlex.quote(str(hooks_dir / 'auto-format.sh'))}"
+    )
 
     for group in event_groups.get("PreToolUse", []):
         for handler in group.get("hooks", []):
@@ -48,21 +51,36 @@ def adapt_user_hooks(data: dict[str, Any], hooks_dir: Path) -> None:
                 group["matcher"] = "Bash"
                 handler["command"] = env_command
 
-    post_tool_use_groups: list[HookGroup] = []
     for group in event_groups.get("PostToolUse", []):
-        group["hooks"] = [
-            handler
-            for handler in group.get("hooks", [])
-            if ".claude/hooks/auto-format.sh" not in handler.get("command", "")
-            and ".codex/hooks/auto-format.sh" not in handler.get("command", "")
-        ]
-        if group["hooks"]:
-            post_tool_use_groups.append(group)
-    event_groups["PostToolUse"] = post_tool_use_groups
+        for handler in group.get("hooks", []):
+            command = handler.get("command", "")
+            if (
+                ".claude/hooks/auto-format.sh" in command
+                or ".codex/hooks/auto-format.sh" in command
+            ):
+                group["matcher"] = "Write|Edit"
+                handler["command"] = auto_format_command
 
 
 def is_orca_managed(group: HookGroup) -> bool:
-    return any("/.orca/agent-hooks/" in command and "claude-hook.sh" not in command for command in commands(group))
+    return any(
+        "/.orca/agent-hooks/" in command and "claude-hook.sh" not in command
+        for command in commands(group)
+    )
+
+
+def is_claude_orca_shim(group: HookGroup) -> bool:
+    return any(
+        "/.orca/agent-hooks/claude-hook.sh" in command
+        for command in commands(group)
+    )
+
+
+def is_native_codex_orca_hook(group: HookGroup) -> bool:
+    return any(
+        "/.orca/agent-hooks/codex-hook.sh" in command
+        for command in commands(group)
+    )
 
 
 def fingerprint(group: HookGroup) -> str:
@@ -116,7 +134,12 @@ def merge_active_hooks(active: dict[str, Any], user: dict[str, Any]) -> None:
                 raise SystemExit(
                     f"Refusing to replace unknown active hook group: {event}[{index}]"
                 )
-        merged[event] = deduplicate([*managed, *user_events.get(event, [])])
+        user_groups = user_events.get(event, [])
+        if any(is_native_codex_orca_hook(group) for group in managed):
+            user_groups = [
+                group for group in user_groups if not is_claude_orca_shim(group)
+            ]
+        merged[event] = deduplicate([*managed, *user_groups])
 
     active["hooks"] = merged
 

@@ -9,6 +9,8 @@ status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "
 [features]
 hooks = true
 
+[hooks.state]
+
 [hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:0:0"]
 enabled = true
 trusted_hash = "sha256:81d639745c893712bed8af5c768a5f10e3131c8ece334fe48eb53f4e34a06a88"

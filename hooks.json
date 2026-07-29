@@ -35,6 +35,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "/bin/bash /Users/pullim/.codex/hooks/auto-format.sh"
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "if [ -f '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -r '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -x '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/pullim/.orca/agent-hooks/claude-hook.sh'; else cat >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }
@@ -54,6 +63,40 @@
       }
     ],
     "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -r '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -x '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/pullim/.orca/agent-hooks/claude-hook.sh'; else cat >/dev/null 2>&1 || :; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -r '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -x '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/pullim/.orca/agent-hooks/claude-hook.sh'; else cat >/dev/null 2>&1 || :; fi",
+            "timeout": 10
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -r '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -x '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/pullim/.orca/agent-hooks/claude-hook.sh'; else cat >/dev/null 2>&1 || :; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
       {
         "hooks": [
           {

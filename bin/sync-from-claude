@@ -52,6 +52,27 @@ link_claude_rules() {
   done
 }
 
+link_claude_docs() {
+  target_root="$1"
+  source_doc="$claude_root/docs/claude-md-audit.md"
+  [ -f "$source_doc" ] || return 0
+
+  target_docs="$target_root/docs"
+  target_doc="$target_docs/claude-md-audit.md"
+  mkdir -p "$target_docs"
+  if [ -e "$target_doc" ] && [ ! -L "$target_doc" ]; then
+    echo "Refusing to replace existing audit document: $target_doc" >&2
+    exit 1
+  fi
+  ln -sfn "$source_doc" "$target_doc"
+
+  legacy_doc="$target_root/rules/claude-md-audit.md"
+  legacy_source="$claude_root/rules/claude-md-audit.md"
+  if [ -L "$legacy_doc" ] && [ "$(readlink "$legacy_doc")" = "$legacy_source" ]; then
+    rm -f "$legacy_doc"
+  fi
+}
+
 rewrite_skill_arguments() {
   source_dir="$1"
   target_skill="$HOME/.agents/skills/$(basename "$source_dir")/SKILL.md"
@@ -153,6 +174,8 @@ if [ "$write_mode" = true ]; then
     s/immediately propose which file\/section to update/immediately propose updating the canonical `~\/.claude\/CLAUDE.md` source and identify the section/g;
     s/a CLAUDE\.md update/an update to the canonical `~\/.claude\/CLAUDE.md` source/g;
     s/When modifying any CLAUDE\.md/When modifying the canonical `~\/.claude\/CLAUDE.md` source/g;
+    s/`docs\/claude-md-audit\.md`/`~\/.codex\/docs\/claude-md-audit.md`/g;
+    s/`agents\/reviewer\.md`/`~\/.codex\/agents\/reviewer.toml`/g;
   ' "$agents_temp"
   agents_with_notice="$codex_root/AGENTS.md.notice-tmp"
   {
@@ -164,6 +187,7 @@ if [ "$write_mode" = true ]; then
   mv "$agents_with_notice" "$agents_temp"
   mv "$agents_temp" "$codex_root/AGENTS.md"
   link_claude_rules "$codex_root"
+  link_claude_docs "$codex_root"
   ensure_codex_config "$codex_root/config.toml"
 
   hooks_sync="$codex_root/bin/sync-codex-hooks.py"
@@ -183,6 +207,7 @@ if [ "$write_mode" = true ]; then
     fi
     ln -sfn "$codex_root/AGENTS.md" "$active_codex_root/AGENTS.md"
     link_claude_rules "$active_codex_root"
+    link_claude_docs "$active_codex_root"
     if [ -d "$active_codex_root/agents" ] && [ ! -L "$active_codex_root/agents" ]; then
       echo "Refusing to replace existing agents directory: $active_codex_root/agents" >&2
       exit 1

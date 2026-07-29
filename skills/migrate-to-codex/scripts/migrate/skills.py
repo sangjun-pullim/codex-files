@@ -43,6 +43,7 @@ SKILL_SOURCE_ROOTS = (
     Path(".claude") / "skills",
 )
 SKILL_SUPPORT_DIRS = ("scripts", "references", "assets")
+SKILL_SUPPORT_FILES = ("reference.md",)
 
 
 def iter_skill_files(source_root: Path) -> tuple[Path, ...]:
@@ -166,7 +167,12 @@ def skill_support_artifacts(source_file: Path) -> list[PlannedArtifact]:
     artifacts: list[PlannedArtifact] = []
     skill_root = source_file.parent
     target_root = CODEX_SKILLS_ROOT / skill_root.name
-    source_files: list[Path] = []
+    source_files = [
+        support_file
+        for filename in SKILL_SUPPORT_FILES
+        for support_file in (skill_root / filename,)
+        if support_file.is_file() and is_path_within_root(support_file, skill_root)
+    ]
     for dirname in SKILL_SUPPORT_DIRS:
         source_dir = skill_root / dirname
         if not source_dir.exists():

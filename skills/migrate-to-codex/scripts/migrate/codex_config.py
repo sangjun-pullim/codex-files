@@ -97,7 +97,7 @@ def render_codex_config(
         }
 
     if codex_hooks_enabled:
-        document["features"] = {"codex_hooks": True}
+        document["features"] = {"hooks": True}
 
     if document:
         document = {"personality": DEFAULT_CODEX_PERSONALITY, **document}

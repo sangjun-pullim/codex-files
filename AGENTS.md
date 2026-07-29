@@ -6,7 +6,6 @@
 ## Identity
 
 Backend + Fullstack developer.
-Node.js, NestJS, Prisma, Puppeteer, React, Next.js, Electron stack.
 
 ## Discipline
 
@@ -32,21 +31,14 @@ Node.js, NestJS, Prisma, Puppeteer, React, Next.js, Electron stack.
 
 ## Task Tier (Risk Triage)
 
-Before planning, classify the task by deterministic signals (touched paths/content + behavior change), not by gut feel. When uncertain, pick the higher tier (fail-closed). Canonical definitions, special cases (deps / deletion / CI / cache / backfill), and examples: `~/.codex/rules/risk-triage.md` — if this section and that file disagree, that file wins.
-
-- **Risk surface** = auth / payment / permission / DB schema / migration / external API contract (full list in `~/.codex/rules/risk-triage.md`; judged by what the change does, not just path).
-- **tier-0**: ≤1 file, no behavior change, no risk surface. Plan ceremony optional; lint/build/test still required; reviewer still required if executable code is touched.
-- **tier-1**: behavior change, no risk surface, <5 files. Lightweight plan + tests + reviewer.
-- **tier-2**: any risk surface OR 5+ files. Full harness (impl-plan → impl-execute → verify).
-- **HARD OVERRIDE**: touches the risk surface, or you can't prove it doesn't → tier-2 regardless of file count.
+Before planning, classify the task by deterministic signals (touched paths/content + behavior change), not by gut feel. When uncertain, pick the higher tier (fail-closed). Tier definitions, the risk surface list, special cases (deps / deletion / CI / cache / backfill), and examples all live in `~/.codex/rules/risk-triage.md` — that file is canonical.
 
 ## Work Rules
 
-- IMPORTANT: Always skim the project's AGENTS.md (or fallback CLAUDE.md) `## Documentation` index and `docs/decisions.md` before starting (every tier). For tier-1+ or any behavior change, follow the full `docs/` Research Order (decisions, architecture, business-logic, bug-fixes first) per `~/.codex/rules/second-brain.md` before diving into source.
-- IMPORTANT: Plan before implementing, then share it and get approval before building — required whenever the change alters behavior or touches 5+ files (tier-1+). tier-0 (as defined in `~/.codex/rules/risk-triage.md`) may skip the plan ceremony only.
-- IMPORTANT: For features/bugfixes that are test-pinnable, write tests first (or alongside) and run them to verify. auth/payment/permission/migration changes always get tests regardless of size. Running test/build/lint before reporting "done" is required at every tier.
-- IMPORTANT: After touching any executable code (not prose/`.md`/comments), run the reviewer agent before reporting done. Pure-prose changes (tier-0 docs) are exempt.
-- IMPORTANT: After changes to architecture, DB schema, API, or business logic, *suggest* `docs/` updates with specific file/section. Never auto-update without approval.
+- The tier gates the ceremony — plan, tests, reviewer, which docs to read. Apply the table and the non-negotiable floors in `~/.codex/rules/risk-triage.md`; they are the spec, not a summary of one.
+- Share the plan and get approval before building, for any change that alters behavior or touches 5+ files (tier-1+).
+- Review executable code before reporting done: the reviewer agent when agent spawning is available, otherwise a self-review pass against `~/.codex/agents/reviewer.toml`. State which one ran.
+- After changes to architecture, DB schema, API, or business logic, *suggest* `docs/` updates with a specific file/section — never auto-update without approval.
 - IMPORTANT: Never read .env, secret, or credential files.
 - If unsure, ask back rather than guess. Get solid evidence before proceeding.
 - Transform tasks into verifiable goals before starting. "Fix the bug" → "Write a test that reproduces it, then make it pass."
@@ -58,4 +50,4 @@ Before planning, classify the task by deterministic signals (touched paths/conte
 - If you notice yourself repeating the same mistake twice in a session, proactively propose an update to the canonical `~/.claude/CLAUDE.md` source before the user has to ask.
 - Rules added this way MUST be measurable. ❌ "write good tests" / ✅ "mock all external dependencies in tests".
 - Prefer updating an existing rule over appending a new one. Keep this file under 100 lines.
-- When modifying the canonical `~/.claude/CLAUDE.md` source, follow `~/.codex/rules/claude-md-audit.md` (tag → decide → diff → mapping table).
+- When modifying the canonical `~/.claude/CLAUDE.md` source, read and follow `~/.codex/docs/claude-md-audit.md` (tag → decide → diff → mapping table).

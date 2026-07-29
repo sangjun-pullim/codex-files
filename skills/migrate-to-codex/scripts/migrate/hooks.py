@@ -24,12 +24,24 @@ from migrate.settings import CLAUDE_SETTINGS_JSON_RELATIVE
 CODEX_HOOKS_PATH = Path(".codex") / "hooks.json"
 CODEX_HOOK_EVENTS = (
     "PreToolUse",
+    "PermissionRequest",
     "PostToolUse",
     "SessionStart",
+    "SubagentStart",
+    "SubagentStop",
     "UserPromptSubmit",
     "Stop",
 )
-CODEX_HOOK_MATCHER_EVENTS = frozenset(("PreToolUse", "PostToolUse", "SessionStart"))
+CODEX_HOOK_MATCHER_EVENTS = frozenset(
+    (
+        "PreToolUse",
+        "PermissionRequest",
+        "PostToolUse",
+        "SessionStart",
+        "SubagentStart",
+        "SubagentStop",
+    )
+)
 
 
 @dataclass(frozen=True)
@@ -183,10 +195,11 @@ class ClaudeHooks:
     def report_detail(self) -> str:
         runtime_caveats = (
             "Rewritten for Codex hooks; review behavior before relying on it. "
-            "Codex hooks require `[features].codex_hooks = true`, only execute "
-            "`command` handlers, skip `async` / `prompt` / `agent` handlers, ignore "
-            "`matcher` for `UserPromptSubmit` and `Stop`, and `PreToolUse` / "
-            "`PostToolUse` currently run for shell commands only."
+            "Codex hooks are enabled by default; `[features].hooks` is the canonical "
+            "feature key and `hooks = false` disables them. Codex only executes "
+            "`command` handlers, skips `async` / `prompt` / `agent` handlers, ignores "
+            "`matcher` for `UserPromptSubmit` and `Stop`, and runs `PreToolUse` / "
+            "`PostToolUse` for Bash, `apply_patch`, MCP, and other local function tools."
         )
         if not self.unsupported_fields:
             return runtime_caveats

@@ -4,7 +4,7 @@
 
 This reference covers Claude Code to Codex migration only. It lists migration differences, partial mappings, and unsupported Claude Code behavior. Direct 1:1 mappings are intentionally omitted. When the converter preserves Claude-only semantics as prompt guidance, it also emits a `manual_fix_required` report row and writes a `## MANUAL MIGRATION REQUIRED` block into the generated file.
 
-Docs last checked: 2026-04-20. If today's date is later, re-open the official Codex docs below and the Claude Code docs map before trusting these mappings.
+Docs last checked: 2026-07-29. If today's date is later, re-open the official Codex docs below and the Claude Code docs map before trusting these mappings.
 
 ## Instructions
 
@@ -25,7 +25,7 @@ Docs last checked: 2026-04-20. If today's date is later, re-open the official Co
 
 | Source | Codex | Migration behavior | Caveat |
 | --- | --- | --- | --- |
-| `.claude/skills/<name>/SKILL.md` | `.agents/skills/<name>/SKILL.md` | Converted; selected support directories are copied | Skill-local `scripts/`, `references/`, and `assets/` are copied when they are real files under the source skill root. |
+| `.claude/skills/<name>/SKILL.md` | `.agents/skills/<name>/SKILL.md` | Converted; selected support files and directories are copied | Skill-local `reference.md`, `scripts/`, `references/`, and `assets/` are copied when they are real files under the source skill root. |
 | `.claude/skills/<name>.md` | `.agents/skills/<name>/SKILL.md` | Converted as a single-file skill | No sibling support directories are copied for this legacy shape. |
 | `allowed-tools` | No strict skill allowlist | Preserved as prompt guidance in `SKILL.md` | `agents/openai.yaml` can declare tool dependencies, but that is not a permission boundary. |
 | `user-invocable` | `policy.allow_implicit_invocation` | Manual review only | Similar intent, not equivalent semantics. |
@@ -79,17 +79,19 @@ Docs last checked: 2026-04-20. If today's date is later, re-open the official Co
 
 | Source | Codex | Migration behavior | Caveat |
 | --- | --- | --- | --- |
-| `hooks` in `~/.claude/settings.json`, `.claude/settings.json`, or `.claude/settings.local.json` | `.codex/hooks.json` + `[features].codex_hooks = true` | Partial conversion | Review behavior before relying on migrated hooks; Claude and Codex hook runtimes are not 1:1. |
+| `hooks` in `~/.claude/settings.json`, `.claude/settings.json`, or `.claude/settings.local.json` | `.codex/hooks.json` + optional `[features].hooks = true` | Partial conversion | Hooks are enabled by default and `hooks` is the canonical feature key; review migrated behavior because the runtimes are not 1:1. |
 | `Notification` | `notify` | Manual rewrite only | `notify` is a turn-complete notification command, not a general lifecycle hook or approval-prompt hook. |
-| `PreToolUse` | `PreToolUse` in `.codex/hooks.json` | Partial conversion | Codex currently runs PreToolUse for shell commands only and blocks only `permissionDecision: "deny"`, legacy `decision: "block"`, or exit code `2`. |
-| `PostToolUse` | `PostToolUse` in `.codex/hooks.json` | Partial conversion | Codex currently runs PostToolUse for shell commands only; `decision: "block"` becomes model feedback, and `continue: false` stops execution. Formatting or fixups that Claude tied to `Edit`/`Write` should move to a `Stop` hook, because only Bash is matched for `PostToolUse`. |
+| `PreToolUse` | `PreToolUse` in `.codex/hooks.json` | Partial conversion | Codex observes Bash, `apply_patch`, MCP, and other local function tools. `Edit` and `Write` match `apply_patch`, whose input still uses the canonical `apply_patch` shape. |
+| `PostToolUse` | `PostToolUse` in `.codex/hooks.json` | Partial conversion | Codex observes Bash, `apply_patch`, MCP, and other local function tools; `decision: "block"` becomes model feedback after the tool has already run. |
 | `UserPromptSubmit` | `UserPromptSubmit` in `.codex/hooks.json` | Partial conversion | Codex can inject context or block a prompt, but it ignores `matcher` for this event and does not support source `if` filters. |
-| `SessionStart` | `SessionStart` in `.codex/hooks.json` | Partial conversion | Codex matches `startup` and `resume`; Claude may also expose other session flows. |
+| `SessionStart` | `SessionStart` in `.codex/hooks.json` | Partial conversion | Codex matches `startup`, `resume`, `clear`, and `compact`; Claude may expose different session flows. |
 | `Stop` | `Stop` in `.codex/hooks.json` | Partial conversion | Codex ignores `matcher` for Stop, can request a continuation prompt, and does not expose every source subagent/teammate stop lifecycle. |
-| `PermissionRequest` / `SubagentStart` / `SubagentStop` / `TaskCreated` / `TaskCompleted` / `StopFailure` / `PreCompact` / `PostCompact` / `SessionEnd` | No direct equivalent | Unsupported | Keep as manual follow-up items; Codex does not expose matching lifecycle coverage today. |
+| `PermissionRequest` / `SubagentStart` / `SubagentStop` | Matching Codex lifecycle events | Partial conversion | Command handlers and matchers are preserved, but input/output semantics still require review. |
+| `PreCompact` / `PostCompact` / `SessionEnd` | Matching Codex lifecycle events | Manual review only | Codex exposes these events, but this converter does not map them yet because their trigger and timeout constraints need event-aware handling. |
+| `TaskCreated` / `TaskCompleted` / `StopFailure` / `PostToolUseFailure` / `TeammateIdle` | No direct equivalent | Unsupported | Keep as manual follow-up items; Codex does not expose matching lifecycle coverage today. |
 | `type: "command"` | `type: "command"` | Partial conversion | `command`, `timeout` / `timeoutSec`, and `statusMessage` map. Empty commands are skipped by Codex. |
 | `type: "prompt"` / `type: "agent"` / `type: "http"` / `async: true` | No direct equivalent | Unsupported | Codex parses `prompt` / `agent` but skips them, and async hooks are skipped. HTTP hooks need a wrapper command. |
-| Hook `matcher` + `if` filters | Regex `matcher` only | Partial conversion | Codex keeps regex `matcher` for `PreToolUse`, `PostToolUse`, and `SessionStart` only. Source `if` filters do not map. |
+| Hook `matcher` + `if` filters | Regex `matcher` only | Partial conversion | This converter keeps `matcher` for `PreToolUse`, `PermissionRequest`, `PostToolUse`, `SessionStart`, `SubagentStart`, and `SubagentStop`. Source `if` filters do not map. |
 | Hooks in skills, agents, and plugins | No direct equivalent | Unsupported | Codex discovers hooks from config layers, not from skill or subagent manifests. |
 
 ## Planning and validation
