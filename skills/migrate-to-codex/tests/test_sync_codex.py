@@ -3,10 +3,12 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 import stat
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -582,6 +584,38 @@ class AutoFormatHookTest(unittest.TestCase):
         self.assertNotIn("prettier --write", first_log)
         self.assertEqual(no_target_result.returncode, 0, no_target_result.stderr)
         self.assertFalse(no_target_log_exists)
+
+
+class WorkerReworkInputTest(unittest.TestCase):
+    def test_should_pass_rework_corrections_as_literal_stdin(self) -> None:
+        worker = tomllib.loads((ROOT / "agents/codex-worker.toml").read_text())
+        rework = worker["developer_instructions"].split("## Rework requests", 1)[1]
+        commands = re.findall(r"`([^`\n]*codex exec resume[^`\n]*)`", rework)
+        commands = [command for command in commands if "tee " in command]
+        self.assertEqual(len(commands), 2)
+        for command in commands:
+            with self.subTest(command=command), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                logs = root / "rework-N"
+                logs.mkdir()
+                payload = "don't expand $(touch injected-dollar) or `touch injected-tick`\n한글\n"
+                (logs / "corrections.txt").write_text(payload)
+                self.assertNotIn("<corrections>", command)
+                rendered = command.replace("<worktree>", directory).replace("<repo-root>", directory)
+                rendered = rendered.replace("<scratch>", directory).replace("<session-id>", "test-session")
+                # Mock external CLIs while exercising both shell layers.
+                mock = (
+                    'codex() { test "$6" = "-" || return 91; cat; }; '
+                    'orca() { while [ "$1" != "--command" ]; do shift; done; shift; eval "$1"; }; '
+                )
+                result = subprocess.run(
+                    ["/bin/sh", "-c", mock + rendered], cwd=root,
+                    text=True, capture_output=True, check=False,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual((logs / "out.txt").read_text(), payload)
+                self.assertFalse((root / "injected-dollar").exists())
+                self.assertFalse((root / "injected-tick").exists())
 
 
 if __name__ == "__main__":

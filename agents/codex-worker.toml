@@ -97,15 +97,17 @@ Rules for the report:
 
 **A rework round writes its own logs** to a fresh path (`<scratch>/<task>/rework-N/`). Steps 5–9 read `out.txt` and `last.txt` to count invocations and extract the session id — reuse the first run's files and the gate passes on stale evidence from a run that already ended.
 
-`codex exec resume` takes `[SESSION_ID] [PROMPT]` plus `-o <file>`; it has **no `-C` flag** (verified on codex-cli 0.147.0), so cd first.
+`codex exec resume` takes `[SESSION_ID] [PROMPT]` plus `-o <file>`; use `-` for PROMPT to read stdin. It has **no `-C` flag** (verified on codex-cli 0.147.0), so cd first.
+
+Before either rework mode, create the fresh log directory and save the parent's corrections verbatim as `<scratch>/rework-N/corrections.txt`. Use a file-writing tool, or a single-quoted heredoc delimiter that does not occur as a line in the corrections. Treat corrections as file data: pass them only through stdin, never interpolate them into a shell command. The examples below show simple paths; shell-quote actual paths and the session id, and then shell-quote the entire `--command` value separately for the outer shell (for example, with `shlex.quote` at each layer).
 
 If the spawn prompt points to an EXISTING worktree (path given), do NOT create a new one: reuse that worktree/card, set its comment to "재작업 중", and resume the given codex session with the parent's corrections verbatim, inside the card so output still streams:
 
-`orca terminal create --worktree path:<worktree> --title codex-rework --command "cd <worktree> && codex exec resume <session-id> -o <scratch>/rework-N/last.txt '<corrections>' 2>&1 | tee <scratch>/rework-N/out.txt; exit" --json`
+`orca terminal create --worktree "path:<worktree>" --title codex-rework --command 'cd "<worktree>" && codex exec resume "<session-id>" -o "<scratch>/rework-N/last.txt" - < "<scratch>/rework-N/corrections.txt" 2>&1 | tee "<scratch>/rework-N/out.txt"; exit' --json`
 
 then block on `orca terminal wait` as in orca-mode step 4. Never `resume --last`: parallel workers make it pick the wrong session.
 
-**In-place rework** (the original run was in-place, so there is no worktree to point at): `cd <repo-root> && codex exec resume <session-id> -o <scratch>/rework-N/last.txt "<corrections>" 2>&1 | tee <scratch>/rework-N/out.txt`, run via background Bash exactly as in In-place mode. Do NOT fall back to Mode selection and create a worktree mid-task; that splits one change across two checkouts.
+**In-place rework** (the original run was in-place, so there is no worktree to point at): `cd "<repo-root>" && codex exec resume "<session-id>" -o "<scratch>/rework-N/last.txt" - < "<scratch>/rework-N/corrections.txt" 2>&1 | tee "<scratch>/rework-N/out.txt"`, run via background Bash exactly as in In-place mode. Do NOT fall back to Mode selection and create a worktree mid-task; that splits one change across two checkouts.
 
 Pass the parent's corrections through as given — do not diagnose, expand, or convert them into your own step list. If no session id is provided, grep `session id:` from the previous log if available, else from `orca terminal read` of that card; only fall back to a fresh `codex exec` (original spec + corrections) if none is found. Then collect facts and report exactly as in steps 5–9.
 
