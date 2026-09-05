@@ -1,8 +1,8 @@
 """Convert Claude Code skills and commands into Codex skills.
 
 Reads `.claude/skills/<name>/SKILL.md` and `.claude/skills/<name>.md`, then emits
-`.agents/skills/<name>/SKILL.md` plus supported helper directories for directory
-skills. Also wraps `.claude/commands/*.md` as
+`.agents/skills/<name>/SKILL.md` plus root Markdown support files and supported
+helper directories for directory skills. Also wraps `.claude/commands/*.md` as
 one-file Codex skills. Runtime placeholders, file expansion, shell
 interpolation, and unsupported metadata are preserved with manual-review
 caveats.
@@ -43,7 +43,6 @@ SKILL_SOURCE_ROOTS = (
     Path(".claude") / "skills",
 )
 SKILL_SUPPORT_DIRS = ("scripts", "references", "assets")
-SKILL_SUPPORT_FILES = ("reference.md",)
 
 
 def iter_skill_files(source_root: Path) -> tuple[Path, ...]:
@@ -169,9 +168,10 @@ def skill_support_artifacts(source_file: Path) -> list[PlannedArtifact]:
     target_root = CODEX_SKILLS_ROOT / skill_root.name
     source_files = [
         support_file
-        for filename in SKILL_SUPPORT_FILES
-        for support_file in (skill_root / filename,)
-        if support_file.is_file() and is_path_within_root(support_file, skill_root)
+        for support_file in skill_root.glob("*.md")
+        if support_file.name != "SKILL.md"
+        and support_file.is_file()
+        and is_path_within_root(support_file, skill_root)
     ]
     for dirname in SKILL_SUPPORT_DIRS:
         source_dir = skill_root / dirname

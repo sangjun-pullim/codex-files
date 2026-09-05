@@ -4,7 +4,7 @@
 
 This reference covers Claude Code to Codex migration only. It lists migration differences, partial mappings, and unsupported Claude Code behavior. Direct 1:1 mappings are intentionally omitted. When the converter preserves Claude-only semantics as prompt guidance, it also emits a `manual_fix_required` report row and writes a `## MANUAL MIGRATION REQUIRED` block into the generated file.
 
-Docs last checked: 2026-07-29. If today's date is later, re-open the official Codex docs below and the Claude Code docs map before trusting these mappings.
+Docs last checked: 2026-08-20. If today's date is later, re-open the official Codex docs below and the Claude Code docs map before trusting these mappings.
 
 ## Instructions
 
@@ -30,7 +30,7 @@ Docs last checked: 2026-07-29. If today's date is later, re-open the official Co
 | `allowed-tools` | No strict skill allowlist | Preserved as prompt guidance in `SKILL.md` | `agents/openai.yaml` can declare tool dependencies, but that is not a permission boundary. |
 | `user-invocable` | `policy.allow_implicit_invocation` | Manual review only | Similar intent, not equivalent semantics. |
 | `model` / `effort` | No skill-level model pin | Unsupported | Codex model selection is session/agent scoped in this converter. |
-| `disable-model-invocation` | No direct equivalent | Unsupported | Requires a manual rewrite if the source skill depends on this behavior. |
+| `disable-model-invocation` | `agents/openai.yaml` `policy.allow_implicit_invocation` | The sync wrapper maps `true` to `false` and removes only its managed key when the source becomes `false` or absent | Existing interface, dependency, and unrelated policy metadata is preserved. |
 | `argument-hint` / `context` / `agent` / `hooks` / `paths` / `shell` | No direct equivalent | Unsupported | Keep only if the behavior can be rewritten into prompt guidance or config. |
 
 ## MCP and config

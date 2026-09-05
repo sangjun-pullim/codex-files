@@ -1,1 +1,0 @@
-/Users/pullim/.claude/rules/agents.md

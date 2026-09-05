@@ -23,6 +23,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/block-dangerous-git.sh"
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "if [ -f '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -r '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ] && [ -x '/Users/pullim/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/pullim/.orca/agent-hooks/claude-hook.sh'; else cat >/dev/null 2>&1 || :; fi",
             "timeout": 10
           }

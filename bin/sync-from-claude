@@ -3,8 +3,11 @@ set -eu
 
 claude_root="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 codex_root="${CODEX_CONFIG_DIR:-$HOME/.codex}"
+agents_root="$(dirname "$codex_root")/.agents"
 migrator="$codex_root/skills/migrate-to-codex/scripts/migrate-to-codex.py"
 python_bin="${PYTHON3_BIN:-/opt/homebrew/bin/python3}"
+script_dir="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+policy_merger="$script_dir/merge-skill-policy.py"
 
 ensure_codex_config() {
   config_file="$1"
@@ -73,14 +76,78 @@ link_claude_docs() {
   fi
 }
 
-rewrite_skill_arguments() {
-  source_dir="$1"
-  target_skill="$HOME/.agents/skills/$(basename "$source_dir")/SKILL.md"
+link_user_agents() {
+  target_root="$1"
+  user_agents="$(dirname "$target_root")/AGENTS.md"
+  if [ -d "$user_agents" ] && [ ! -L "$user_agents" ]; then
+    echo "Refusing to replace directory with AGENTS.md link: $user_agents" >&2
+    exit 1
+  fi
+  ln -sfn "$target_root/AGENTS.md" "$user_agents"
+}
+
+rewrite_skill_content() {
+  target_skill="$1"
   [ -f "$target_skill" ] || return 0
   perl -0pi -e '
     s/\$ARGUMENTS/the user-provided invocation text/g;
     s/^the user-provided invocation text$/Apply any user-provided invocation text as additional task context./mg;
+    s{`rules/}{`~/.codex/rules/}g;
+    s{`skills/}{`~/.agents/skills/}g;
+    s{`agents/planner\.md`}{`~/.codex/agents/planner.toml`}g;
+    s{`agents/reviewer\.md`}{`~/.codex/agents/reviewer.toml`}g;
+    s{`~/\.claude/skills/security-checklist/SKILL\.md`}{`~/.agents/skills/security-checklist/SKILL.md`}g;
+    s{Call the Skill tool with "([a-z0-9-]+)"}{Read and follow `~/.agents/skills/$1/SKILL.md`}g;
+    s{call the Skill tool with "([a-z0-9-]+)"}{read and follow `~/.agents/skills/$1/SKILL.md`}g;
+    s/ask via AskUserQuestion:/ask the user directly with a concise plain-text question:/g;
+    s/`AskUserQuestion` with/using a concise plain-text question with/g;
+    s/- Supervisor model is \*\*always sonnet\*\* \(`model: sonnet` in the agent definition\)\. Do not override it downward at spawn\./- The supervisor model follows the generated Codex agent or current session configuration; do not carry Claude model names into Codex spawn overrides./g;
   ' "$target_skill"
+}
+
+rewrite_skill_arguments() {
+  source_dir="$1"
+  rewrite_skill_content "$agents_root/skills/$(basename "$source_dir")/SKILL.md"
+}
+
+apply_skill_invocation_policy() {
+  source_dir="$1"
+  existing_policy="$2"
+  policy_info_file="$3"
+  policy_info="$(sed -n '1p' "$policy_info_file")"
+  policy_state="${policy_info%% *}"
+  field_present="${policy_info#* }"
+
+  target_dir="$agents_root/skills/$(basename "$source_dir")"
+  target_skill="$target_dir/SKILL.md"
+  policy_file="$target_dir/agents/openai.yaml"
+  "$python_bin" "$policy_merger" \
+    --existing "$existing_policy" \
+    --target "$policy_file" \
+    --state "$policy_state" \
+    --allowed-root "$agents_root/skills"
+
+  if [ "$field_present" = true ] && [ -f "$target_skill" ]; then
+    perl -0pi -e 's/\n## MANUAL MIGRATION REQUIRED\n\nReview unsupported Claude skill fields manually: `disable-model-invocation`\.\n?\z/\n/' "$target_skill"
+  fi
+
+  report="$codex_root/migrate-to-codex-report.txt"
+  if [ "$field_present" = true ] && [ -f "$report" ]; then
+    skill_name="$(basename "$source_dir")"
+    manual_prefix="  manual_fix_required: .agents/skills/$skill_name/SKILL.md - "
+    report_temp="${report}.sync-tmp"
+    cp -p "$report" "$report_temp"
+    awk -v prefix="$manual_prefix" '
+      $0 == prefix "Manual review required for Claude skill fields: `disable-model-invocation`." { next }
+      { print }
+    ' "$report" > "$report_temp"
+    mv "$report_temp" "$report"
+  fi
+}
+
+skill_policy_info() {
+  source_skill="$1"
+  "$python_bin" "$policy_merger" --source-skill "$source_skill"
 }
 
 if [ ! -f "$migrator" ]; then
@@ -105,6 +172,37 @@ for arg in "$@"; do
   esac
 done
 
+policy_backup_root=""
+if [ "$write_mode" = true ]; then
+  [ -f "$policy_merger" ] || {
+    echo "Missing skill policy merger: $policy_merger" >&2
+    exit 1
+  }
+  policy_backup_root="$(mktemp -d "${TMPDIR:-/tmp}/codex-skill-policy.XXXXXX")"
+  trap 'rm -rf "$policy_backup_root"' EXIT
+  for source_skill in "$claude_root"/skills/*; do
+    [ -f "$source_skill/SKILL.md" ] || continue
+    skill_name="$(basename "$source_skill")"
+    existing_policy="$agents_root/skills/$skill_name/agents/openai.yaml"
+    policy_info="$(skill_policy_info "$source_skill/SKILL.md")"
+    printf '%s\n' "$policy_info" > "$policy_backup_root/$skill_name.policy-state"
+    "$python_bin" "$policy_merger" \
+      --existing "$existing_policy" \
+      --target "$existing_policy" \
+      --state "${policy_info%% *}" \
+      --allowed-root "$agents_root/skills" \
+      --check
+  done
+  for source_skill in "$claude_root"/skills/*; do
+    [ -f "$source_skill/SKILL.md" ] || continue
+    skill_name="$(basename "$source_skill")"
+    existing_policy="$agents_root/skills/$skill_name/agents/openai.yaml"
+    if [ -f "$existing_policy" ]; then
+      cp -p "$existing_policy" "$policy_backup_root/$skill_name.openai.yaml"
+    fi
+  done
+fi
+
 if [ "$scan_only" = true ]; then
   "$python_bin" "$migrator" --source "$claude_root/" "$@"
 else
@@ -127,6 +225,11 @@ if [ "$write_mode" = true ]; then
   for source_skill in "$claude_root"/skills/*; do
     [ -f "$source_skill/SKILL.md" ] || continue
     rewrite_skill_arguments "$source_skill"
+    skill_name="$(basename "$source_skill")"
+    apply_skill_invocation_policy \
+      "$source_skill" \
+      "$policy_backup_root/$skill_name.openai.yaml" \
+      "$policy_backup_root/$skill_name.policy-state"
   done
 
   # The placeholder warning is resolved by the rewrite above. Keep other
@@ -134,17 +237,14 @@ if [ "$write_mode" = true ]; then
   for source_command in "$claude_root"/commands/*.md; do
     [ -f "$source_command" ] || continue
     command_name="$(basename "$source_command" .md)"
-    command_skill="$HOME/.agents/skills/source-command-$command_name/SKILL.md"
+    command_skill="$agents_root/skills/source-command-$command_name/SKILL.md"
     [ -f "$command_skill" ] || continue
-    perl -0pi -e '
-      s/\$ARGUMENTS/the user-provided invocation text/g;
-      s/^the user-provided invocation text$/Apply any user-provided invocation text as additional task context./mg;
-    ' "$command_skill"
+    rewrite_skill_content "$command_skill"
     perl -0pi -e 's/\n## MANUAL MIGRATION REQUIRED\n.*\z/\n/s' "$command_skill"
   done
 
-  # Planner/reviewer only inspect and report; enforce the source tool intent
-  # with Codex's native read-only sandbox and remove the resolved warning.
+  # Planner/reviewer only inspect and report. Read-only blocks file writes, while
+  # the generated tool guidance documents restrictions Codex cannot enforce here.
   for generated_agent in "$codex_root"/agents/planner.toml "$codex_root"/agents/reviewer.toml; do
     [ -f "$generated_agent" ] || continue
     if ! grep -q '^sandbox_mode[[:space:]]*=' "$generated_agent"; then
@@ -159,7 +259,13 @@ if [ "$write_mode" = true ]; then
       ' "$generated_agent" > "$temp_file"
       mv "$temp_file" "$generated_agent"
     fi
-    perl -0pi -e 's/\n## Tools\n.*?"""\s*\z/\n"""\n/s' "$generated_agent"
+    rewrite_skill_content "$generated_agent"
+    if [ "$generated_agent" = "$codex_root/agents/reviewer.toml" ]; then
+      perl -0pi -e '
+        s/You have no Bash .*?prompt gives you\./Use Bash only for read-only inspection (for example, rg, sed, find, and git diff\/status); never modify files./s;
+        s/(- Read\n- Grep\n- Glob\n)/$1- Bash\n/;
+      ' "$generated_agent"
+    fi
   done
 
   # Generate provider-specific global guidance without editing the Claude source.
@@ -187,6 +293,7 @@ if [ "$write_mode" = true ]; then
   } > "$agents_with_notice"
   mv "$agents_with_notice" "$agents_temp"
   mv "$agents_temp" "$codex_root/AGENTS.md"
+  link_user_agents "$codex_root"
   link_claude_rules "$codex_root"
   link_claude_docs "$codex_root"
   ensure_codex_config "$codex_root/config.toml"

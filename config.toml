@@ -1,6 +1,6 @@
 personality = "friendly"
-model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
 project_doc_fallback_filenames = ["CLAUDE.md"]
 
 [tui]
@@ -21,12 +21,10 @@ trusted_hash = "sha256:07521182f20052fa3a8d2de345fe445baff39e1a5a05e98d111731c32
 
 [hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:2:0"]
 enabled = true
-trusted_hash = "sha256:576788615cdcaf5f458bccffcc17d66a5e3480059c7842d678ea352bd509181a"
-
+trusted_hash = "sha256:efb41b80c7358aca2097c3028527421822beae6557448471229cf6936d4c0b15"
 [hooks.state."/Users/pullim/.codex/hooks.json:post_tool_use:0:0"]
 enabled = true
-trusted_hash = "sha256:91f0a89f6fe6442ae91d8353b83cba62f28a2a160cdd190f9e85f5cd5890036f"
-
+trusted_hash = "sha256:40bc043554ee82db686638d37331d8910f32189e761dd0ef16c1e460cd2b81e4"
 [hooks.state."/Users/pullim/.codex/hooks.json:user_prompt_submit:0:0"]
 enabled = true
 trusted_hash = "sha256:28d6d67f056aabc5ef0ea518f05973cf2ad61be989d75c734795d4761e09fe39"
@@ -36,4 +34,33 @@ enabled = true
 trusted_hash = "sha256:64b29e11a13c7a261e5132ab623c58f5aab967a7c777023f9bc3f40ce7ebed5f"
 
 [projects."/Users/pullim/Documents/workspace/luxury-collector"]
+trust_level = "trusted"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:permission_request:0:0"]
+enabled = true
+trusted_hash = "sha256:1f00f22f662313b2dca56be1935b4bf97f5c85c073773a0eeadda191c0ce21e9"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:subagent_start:0:0"]
+enabled = true
+trusted_hash = "sha256:b52de0045a8b02999380788422e6c806cd553bf3dc59a0313d77b354558bdde8"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:subagent_stop:0:0"]
+enabled = true
+trusted_hash = "sha256:58e37ee167126a982f3d7ae0c87cf7e7b47851626601bae0fd905c82af4eb6b0"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:post_tool_use:1:0"]
+enabled = true
+trusted_hash = "sha256:91f0a89f6fe6442ae91d8353b83cba62f28a2a160cdd190f9e85f5cd5890036f"
+
+[projects."/Users/pullim/.claude"]
+trust_level = "trusted"
+
+[hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:3:0"]
+enabled = true
+trusted_hash = "sha256:576788615cdcaf5f458bccffcc17d66a5e3480059c7842d678ea352bd509181a"
+
+[projects."/Users/pullim/.codex"]
+trust_level = "trusted"
+
+[projects."/Users/pullim/Documents/workspace"]
 trust_level = "trusted"
