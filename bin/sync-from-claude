@@ -167,6 +167,7 @@ if [ "$write_mode" = true ]; then
   cp "$claude_root/CLAUDE.md" "$agents_temp"
   perl -0pi -e '
     s/^# Global CLAUDE\.md$/# Global AGENTS.md/m;
+    s/AskUserQuestion으로/간결한 일반 텍스트 질문으로/g;
     s/the project.s CLAUDE\.md/the project\x27s AGENTS.md (or fallback CLAUDE.md)/g;
     s/config → `~\/\.claude\/`/config → `~\/\.codex\/`/g;
     s/`rules\//`~\/.codex\/rules\//g;
