@@ -106,7 +106,7 @@ class SyncFromClaudeTest(unittest.TestCase):
             )
 
             result = subprocess.run(
-                [str(SYNC_FROM_CLAUDE_PATH)],
+                [str(SYNC_FROM_CLAUDE_PATH), "--skills"],
                 text=True,
                 capture_output=True,
                 env=environment,
@@ -169,7 +169,7 @@ class SyncFromClaudeTest(unittest.TestCase):
                 "---\nname: example\ndescription: Example.\n---\n"
             )
             second_result = subprocess.run(
-                [str(SYNC_FROM_CLAUDE_PATH)],
+                [str(SYNC_FROM_CLAUDE_PATH), "--skills"],
                 text=True,
                 capture_output=True,
                 env=environment,
@@ -231,7 +231,7 @@ class SyncFromClaudeTest(unittest.TestCase):
             )
 
             result = subprocess.run(
-                [str(SYNC_FROM_CLAUDE_PATH)],
+                [str(SYNC_FROM_CLAUDE_PATH), "--skills"],
                 text=True,
                 capture_output=True,
                 env=environment,

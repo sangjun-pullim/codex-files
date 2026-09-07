@@ -162,8 +162,10 @@ fi
 
 write_mode=true
 scan_only=false
+import_skills=false
 for arg in "$@"; do
   case "$arg" in
+    --skills) import_skills=true ;;
     --scan-only)
       write_mode=false
       scan_only=true
@@ -173,7 +175,7 @@ for arg in "$@"; do
 done
 
 policy_backup_root=""
-if [ "$write_mode" = true ]; then
+if [ "$write_mode" = true ] && [ "$import_skills" = true ]; then
   [ -f "$policy_merger" ] || {
     echo "Missing skill policy merger: $policy_merger" >&2
     exit 1
@@ -206,7 +208,7 @@ fi
 if [ "$scan_only" = true ]; then
   "$python_bin" "$migrator" --source "$claude_root/" "$@"
 else
-  "$python_bin" "$migrator" --source "$claude_root/" --target "$codex_root/" --skills --subagents "$@"
+  "$python_bin" "$migrator" --source "$claude_root/" --target "$codex_root/" --subagents "$@"
 fi
 
 # The upstream migrator may carry Claude-only model identifiers into Codex.
@@ -222,26 +224,28 @@ if [ "$write_mode" = true ]; then
 
   # Codex skills receive the user's invocation text directly; Claude's
   # $ARGUMENTS placeholder is not expanded by the Codex skill runtime.
-  for source_skill in "$claude_root"/skills/*; do
-    [ -f "$source_skill/SKILL.md" ] || continue
-    rewrite_skill_arguments "$source_skill"
-    skill_name="$(basename "$source_skill")"
-    apply_skill_invocation_policy \
-      "$source_skill" \
-      "$policy_backup_root/$skill_name.openai.yaml" \
-      "$policy_backup_root/$skill_name.policy-state"
-  done
+  if [ "$import_skills" = true ]; then
+    for source_skill in "$claude_root"/skills/*; do
+      [ -f "$source_skill/SKILL.md" ] || continue
+      rewrite_skill_arguments "$source_skill"
+      skill_name="$(basename "$source_skill")"
+      apply_skill_invocation_policy \
+        "$source_skill" \
+        "$policy_backup_root/$skill_name.openai.yaml" \
+        "$policy_backup_root/$skill_name.policy-state"
+    done
 
-  # The placeholder warning is resolved by the rewrite above. Keep other
-  # migration warnings intact because they still require semantic review.
-  for source_command in "$claude_root"/commands/*.md; do
-    [ -f "$source_command" ] || continue
-    command_name="$(basename "$source_command" .md)"
-    command_skill="$agents_root/skills/source-command-$command_name/SKILL.md"
-    [ -f "$command_skill" ] || continue
-    rewrite_skill_content "$command_skill"
-    perl -0pi -e 's/\n## MANUAL MIGRATION REQUIRED\n.*\z/\n/s' "$command_skill"
-  done
+    # The placeholder warning is resolved by the rewrite above. Keep other
+    # migration warnings intact because they still require semantic review.
+    for source_command in "$claude_root"/commands/*.md; do
+      [ -f "$source_command" ] || continue
+      command_name="$(basename "$source_command" .md)"
+      command_skill="$agents_root/skills/source-command-$command_name/SKILL.md"
+      [ -f "$command_skill" ] || continue
+      rewrite_skill_content "$command_skill"
+      perl -0pi -e 's/\n## MANUAL MIGRATION REQUIRED\n.*\z/\n/s' "$command_skill"
+    done
+  fi
 
   # Planner/reviewer only inspect and report. Read-only blocks file writes, while
   # the generated tool guidance documents restrictions Codex cannot enforce here.

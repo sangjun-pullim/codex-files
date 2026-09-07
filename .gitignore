@@ -12,6 +12,9 @@
 !agents/
 !agents/**
 
+!agent-skills/
+!agent-skills/**
+
 !bin/
 !bin/**
 
