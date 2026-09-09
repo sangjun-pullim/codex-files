@@ -1,6 +1,6 @@
 ---
 name: "improve-codebase-architecture"
-description: "Scan a codebase for deepening opportunities, present them as a visual Artifact report, then grill through whichever one you pick."
+description: "Find module deepening opportunities and present an architecture review for the user to choose from."
 ---
 
 # Improve Codebase Architecture
@@ -21,7 +21,7 @@ This command is _informed_ by the project's domain model and built on a shared d
 - If the user named a direction — a module, a subsystem, a pain point — take it, and skip the inference below.
 - Otherwise, walk back a good stretch of the commit history (`git log --oneline`) to find the codebase's hot spots — the files and areas that keep coming up — and let those paths pull your attention first. If the changes are scattered with no clear hot spot, widen the net.
 
-Follow the refactoring Research Order in `~/.claude/rules/second-brain.md` first.
+Consult relevant design decisions using `~/.codex/rules/second-brain.md` when they affect the refactoring.
 
 Then spawn a sub-agent to walk the codebase. Don't follow rigid heuristics — explore organically and note where you experience friction:
 
@@ -55,4 +55,3 @@ As decisions crystallize, propose the matching docs updates — applied only wit
 - **Sharpening a fuzzy term during the conversation?** Propose the correction right there.
 - **User rejects the candidate with a load-bearing reason?** Offer a `docs/ADR.md` entry when it meets the recording criteria in the `second-brain` skill, framed as: _"이걸 ADR.md에 기록해서 다음 아키텍처 리뷰가 같은 걸 다시 제안하지 않게 할까요?"_ Skip ephemeral reasons ("not worth it right now") and self-evident ones.
 - **Want to explore alternative interfaces for the deepened module?** Read and follow `~/.agents/skills/codebase-design/SKILL.md` and use its design-it-twice parallel sub-agent pattern.
-

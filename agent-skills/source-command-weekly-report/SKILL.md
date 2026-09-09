@@ -1,6 +1,6 @@
 ---
 name: "source-command-weekly-report"
-description: "Git \uc774\ub825 \uae30\ubc18 \uc8fc\uac04\uc5c5\ubb34\ubcf4\uace0\uc11c \uc790\ub3d9 \uc0dd\uc131"
+description: "Generate a Korean weekly work report from Git history when requested."
 ---
 
 # source-command-weekly-report
@@ -149,4 +149,3 @@ TZ=Asia/Seoul git log --author="sangjun-lim" --since="<직전 주 토요일>" --
 ## 7단계: 검토
 
 작성된 보고서를 보여주고, 수정이 필요한 부분이 있는지 확인합니다.
-

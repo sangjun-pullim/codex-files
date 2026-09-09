@@ -27,221 +27,39 @@ spec.loader.exec_module(sync_codex_hooks)
 
 
 class SyncFromClaudeTest(unittest.TestCase):
-    def test_links_user_agents_to_codex_specific_instructions(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = Path(temporary_directory)
-            claude_root = root / ".claude"
-            codex_root = root / ".codex"
-            migrator = (
-                codex_root
-                / "skills"
-                / "migrate-to-codex"
-                / "scripts"
-                / "migrate-to-codex.py"
-            )
-            migrator.parent.mkdir(parents=True)
-            migrator.write_text("")
-            claude_root.mkdir()
-            (claude_root / "CLAUDE.md").write_text("# Global CLAUDE.md\n")
-            source_skill = claude_root / "skills" / "example"
-            source_skill.mkdir(parents=True)
-            (source_skill / "SKILL.md").write_text(
-                "---\n"
-                "name: example\n"
-                "description: Example.\n"
-                "disable-model-invocation: true\n"
-                "---\n"
-            )
-            policy_file = (
-                root
-                / ".agents"
-                / "skills"
-                / "example"
-                / "agents"
-                / "openai.yaml"
-            )
-            policy_file.parent.mkdir(parents=True)
-            policy_file.write_text(
-                "interface:\n"
-                '  display_name: "Example"\n'
-                "policy:\n"
-                "  another_policy_key: keep\n"
-                "  allow_implicit_invocation: true\n"
-                "dependencies:\n"
-                "  tools: []\n"
-            )
-            policy_file.chmod(0o640)
-            fake_python = root / "fake-python"
-            fake_python.write_text(
-                "#!/bin/sh\n"
-                'if [ "$1" = "-c" ]; then exit 0; fi\n'
-                'case "$1" in *merge-skill-policy.py) exec "$REAL_PYTHON" "$@" ;; esac\n'
-                'target_parent="$(dirname "$CODEX_CONFIG_DIR")"\n'
-                'rm -rf "$target_parent/.agents/skills/example"\n'
-                'mkdir -p "$target_parent/.agents/skills/example" "$CODEX_CONFIG_DIR/agents"\n'
-                'printf "%s\\n" "Use \\$ARGUMENTS, read \\`rules/example.md\\`, see \\`agents/planner.md\\`, and Call the Skill tool with \\\"codebase-design\\\"." > "$target_parent/.agents/skills/example/SKILL.md"\n'
-                'printf "%s\\n" "Before dispatch, ask via AskUserQuestion: choose." >> "$target_parent/.agents/skills/example/SKILL.md"\n'
-                'printf "%s\\n" "Clarify one question at a time, \\`AskUserQuestion\\` with 2-4 concrete options." >> "$target_parent/.agents/skills/example/SKILL.md"\n'
-                'printf "%s\\n" "- Supervisor model is **always sonnet** (\\`model: sonnet\\` in the agent definition). Do not override it downward at spawn." >> "$target_parent/.agents/skills/example/SKILL.md"\n'
-                'if grep -q "^disable-model-invocation:" "$CLAUDE_CONFIG_DIR/skills/example/SKILL.md"; then\n'
-                '  printf "%s\\n" "" "## MANUAL MIGRATION REQUIRED" "" "Review unsupported Claude skill fields manually: \\`disable-model-invocation\\`." >> "$target_parent/.agents/skills/example/SKILL.md"\n'
-                '  printf "%s\\n" "  manual_fix_required: .agents/skills/example/SKILL.md - Manual review required for Claude skill fields: \\`disable-model-invocation\\`." > "$CODEX_CONFIG_DIR/migrate-to-codex-report.txt"\n'
-                "else\n"
-                '  : > "$CODEX_CONFIG_DIR/migrate-to-codex-report.txt"\n'
-                "fi\n"
-                'printf "%s\\n" "name = \\"planner\\"" "description = \\"Plan.\\"" "developer_instructions = \\\"\\\"\\\"Read \\`rules/risk-triage.md\\` and \\`skills/impl-plan/SKILL.md\\`.\\\"\\\"\\\"" > "$CODEX_CONFIG_DIR/agents/planner.toml"\n'
-                'printf "%s\\n" "name = \\"reviewer\\"" "description = \\"Review.\\"" "developer_instructions = \\\"\\\"\\\"You have no Bash - everything must be reachable by Read/Grep/Glob from the paths the prompt gives you." "- Read" "- Grep" "- Glob" "\\\"\\\"\\\"" > "$CODEX_CONFIG_DIR/agents/reviewer.toml"\n'
-                'printf "# Raw Claude instructions\\n" > "$target_parent/AGENTS.md"\n'
-            )
-            fake_python.chmod(0o755)
-            environment = os.environ.copy()
-            environment.update(
-                {
-                    "CLAUDE_CONFIG_DIR": str(claude_root),
-                    "CODEX_CONFIG_DIR": str(codex_root),
-                    "PYTHON3_BIN": str(fake_python),
-                    "REAL_PYTHON": sys.executable,
-                    "ORCA_CODEX_HOME": "",
-                }
-            )
+    def test_should_refuse_legacy_sync_without_touching_configuration(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            claude = root / ".claude"
+            codex = root / ".codex"
+            claude.mkdir()
+            codex.mkdir()
+            (claude / "CLAUDE.md").write_text("Claude source\n")
+            (codex / "AGENTS.md").write_text("Independent Codex instructions\n")
+            environment = dict(os.environ, CLAUDE_CONFIG_DIR=str(claude),
+                               CODEX_CONFIG_DIR=str(codex), ORCA_CODEX_HOME="")
+            before = {str(p): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+            for flags in ([], ["--skills"], ["--replace"], ["--skills", "--replace"]):
+                with self.subTest(flags=flags):
+                    result = subprocess.run([str(SYNC_FROM_CLAUDE_PATH), *flags],
+                                            env=environment, text=True, capture_output=True)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("disabled", result.stderr)
+                    after = {str(p): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+                    self.assertEqual(after, before)
 
-            result = subprocess.run(
-                [str(SYNC_FROM_CLAUDE_PATH), "--skills"],
-                text=True,
-                capture_output=True,
-                env=environment,
-                check=False,
-            )
-            user_agents = root / "AGENTS.md"
-
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertTrue(user_agents.is_symlink())
-            self.assertEqual(user_agents.resolve(), (codex_root / "AGENTS.md").resolve())
-            self.assertIn("# Global AGENTS.md", user_agents.read_text())
-            generated_skill = root / ".agents" / "skills" / "example" / "SKILL.md"
-            self.assertNotIn("$ARGUMENTS", generated_skill.read_text())
-            self.assertIn("`~/.codex/rules/example.md`", generated_skill.read_text())
-            self.assertIn(
-                "`~/.codex/agents/planner.toml`", generated_skill.read_text()
-            )
-            self.assertIn(
-                "Read and follow `~/.agents/skills/codebase-design/SKILL.md`",
-                generated_skill.read_text(),
-            )
-            self.assertNotIn("AskUserQuestion", generated_skill.read_text())
-            self.assertIn(
-                "ask the user directly with a concise plain-text question:",
-                generated_skill.read_text(),
-            )
-            self.assertIn(
-                "using a concise plain-text question with",
-                generated_skill.read_text(),
-            )
-            self.assertNotIn("always sonnet", generated_skill.read_text())
-            self.assertIn(
-                "The supervisor model follows the generated Codex agent or current session configuration",
-                generated_skill.read_text(),
-            )
-            self.assertNotIn("## MANUAL MIGRATION REQUIRED", generated_skill.read_text())
-            policy_text = policy_file.read_text()
-            self.assertIn('display_name: "Example"', policy_text)
-            self.assertIn("another_policy_key: keep", policy_text)
-            self.assertIn("tools: []", policy_text)
-            self.assertIn("allow_implicit_invocation: false", policy_text)
-            self.assertIn("managed by sync-from-claude", policy_text)
-            self.assertIn("original=true", policy_text)
-            self.assertEqual(stat.S_IMODE(policy_file.stat().st_mode), 0o640)
-            self.assertNotIn(
-                "disable-model-invocation",
-                (codex_root / "migrate-to-codex-report.txt").read_text(),
-            )
-            generated_agent = (codex_root / "agents" / "planner.toml").read_text()
-            self.assertIn('sandbox_mode = "read-only"', generated_agent)
-            self.assertIn("`~/.codex/rules/risk-triage.md`", generated_agent)
-            self.assertIn("`~/.agents/skills/impl-plan/SKILL.md`", generated_agent)
-            generated_reviewer = (codex_root / "agents" / "reviewer.toml").read_text()
-            self.assertIn('sandbox_mode = "read-only"', generated_reviewer)
-            self.assertNotIn("You have no Bash", generated_reviewer)
-            self.assertIn("Use Bash only for read-only inspection", generated_reviewer)
-            self.assertIn("- Bash", generated_reviewer)
-
-            (source_skill / "SKILL.md").write_text(
-                "---\nname: example\ndescription: Example.\n---\n"
-            )
-            second_result = subprocess.run(
-                [str(SYNC_FROM_CLAUDE_PATH), "--skills"],
-                text=True,
-                capture_output=True,
-                env=environment,
-                check=False,
-            )
-
-            self.assertEqual(second_result.returncode, 0, second_result.stderr)
-            transitioned_policy = policy_file.read_text()
-            self.assertIn('display_name: "Example"', transitioned_policy)
-            self.assertIn("another_policy_key: keep", transitioned_policy)
-            self.assertIn("tools: []", transitioned_policy)
-            self.assertIn("allow_implicit_invocation: true", transitioned_policy)
-            self.assertNotIn("managed by sync-from-claude", transitioned_policy)
-            self.assertEqual(stat.S_IMODE(policy_file.stat().st_mode), 0o640)
-
-    def test_rejects_inline_policy_before_migrator_writes(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = Path(temporary_directory)
-            claude_root = root / ".claude"
-            codex_root = root / ".codex"
-            migrator = (
-                codex_root
-                / "skills"
-                / "migrate-to-codex"
-                / "scripts"
-                / "migrate-to-codex.py"
-            )
-            migrator.parent.mkdir(parents=True)
-            migrator.write_text("")
-            (claude_root / "skills" / "example").mkdir(parents=True)
-            (claude_root / "skills" / "example" / "SKILL.md").write_text(
-                "---\nname: example\ndescription: Example.\n"
-                "disable-model-invocation: true\n---\n"
-            )
-            policy_file = (
-                root / ".agents" / "skills" / "example" / "agents" / "openai.yaml"
-            )
-            policy_file.parent.mkdir(parents=True)
-            original_policy = "policy: {allow_implicit_invocation: true}\n"
-            policy_file.write_text(original_policy)
-            migrator_called = root / "migrator-called"
-            fake_python = root / "fake-python"
-            fake_python.write_text(
-                "#!/bin/sh\n"
-                'if [ "$1" = "-c" ]; then exit 0; fi\n'
-                'case "$1" in *merge-skill-policy.py) exec "$REAL_PYTHON" "$@" ;; esac\n'
-                ': > "$MIGRATOR_CALLED"\n'
-            )
-            fake_python.chmod(0o755)
-            environment = os.environ.copy()
-            environment.update(
-                {
-                    "CLAUDE_CONFIG_DIR": str(claude_root),
-                    "CODEX_CONFIG_DIR": str(codex_root),
-                    "PYTHON3_BIN": str(fake_python),
-                    "REAL_PYTHON": sys.executable,
-                    "MIGRATOR_CALLED": str(migrator_called),
-                }
-            )
-
-            result = subprocess.run(
-                [str(SYNC_FROM_CLAUDE_PATH), "--skills"],
-                text=True,
-                capture_output=True,
-                env=environment,
-                check=False,
-            )
-
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("inline policy YAML", result.stderr)
-            self.assertFalse(migrator_called.exists())
-            self.assertEqual(policy_file.read_text(), original_policy)
+    def test_should_preserve_local_guard_behavior(self) -> None:
+        cases = {
+            "block-env-commit.sh": [("git add .env", 2), ("git add .env.example", 0)],
+            "block-dangerous-git.sh": [("git reset --hard", 2), ("git status --short", 0)],
+        }
+        for name, commands in cases.items():
+            for command, expected in commands:
+                with self.subTest(hook=name, command=command):
+                    result = subprocess.run(["/bin/bash", str(ROOT / "hooks" / name)],
+                        input=json.dumps({"tool_name": "Bash", "tool_input": {"command": command}}),
+                        text=True, capture_output=True)
+                    self.assertEqual(result.returncode, expected, result.stderr)
 
 
 class SkillPolicyMergerTest(unittest.TestCase):
@@ -587,6 +405,30 @@ class AutoFormatHookTest(unittest.TestCase):
 
 
 class WorkerReworkInputTest(unittest.TestCase):
+    def test_should_pass_initial_prompt_as_literal_stdin(self) -> None:
+        worker = tomllib.loads((ROOT / "agents/codex-worker.toml").read_text())
+        initial = worker["developer_instructions"].split("## Rework requests", 1)[0]
+        commands = re.findall(r"`([^`\n]*codex exec -s[^`\n]*)`", initial)
+        self.assertEqual(len(commands), 2)
+        for command in commands:
+            with self.subTest(command=command), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                payload = "don't expand $(touch injected-dollar) or `touch injected-tick`\n한글\n"
+                (root / "prompt.md").write_text(payload)
+                rendered = command.replace("<worktree>", directory).replace("<repo-root>", directory)
+                rendered = rendered.replace("<scratch>", directory).replace("<PROMPT>", payload)
+                mock = (
+                    'codex() { while [ "$#" -gt 1 ]; do shift; done; '
+                    'if [ "$1" = "-" ]; then cat; else printf "%s" "$1"; fi; }; '
+                    'orca() { while [ "$1" != "--command" ]; do shift; done; shift; eval "$1"; }; '
+                )
+                result = subprocess.run(["/bin/sh", "-c", mock + rendered], cwd=root,
+                    text=True, capture_output=True, check=False)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual((root / "out.txt").read_text(), payload)
+                self.assertFalse((root / "injected-dollar").exists())
+                self.assertFalse((root / "injected-tick").exists())
+
     def test_should_pass_rework_corrections_as_literal_stdin(self) -> None:
         worker = tomllib.loads((ROOT / "agents/codex-worker.toml").read_text())
         rework = worker["developer_instructions"].split("## Rework requests", 1)[1]

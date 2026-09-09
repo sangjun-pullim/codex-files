@@ -1,6 +1,6 @@
 ---
 name: "security-checklist"
-description: "Security Checklist \u2014 perform a security audit on NestJS/Node.js projects. Use this skill when the user asks about security review, vulnerability check, OWASP compliance, hardcoded secrets scan, or wants to audit their NestJS/Node.js application for security issues. Only trigger for NestJS or Node.js backend projects, not for React/Next.js frontend-only or Electron projects."
+description: "Audit NestJS or Node.js backend security when requested or required. Excludes frontend-only and Electron projects."
 ---
 
 # Security Checklist

@@ -5,6 +5,9 @@ description: Migrate supported instruction files, skills, agents, and MCP config
 
 # Migrate to Codex
 
+Local boundary: this tool is retained only for an explicitly requested migration with a named source and target. Personal Codex settings are independently maintained; do not import Claude settings into `~/.codex` or `~/.agents` as setup or maintenance. The retired `sync-from-claude` entrypoint must remain disabled.
+
+
 ## Autonomy
 
 Keep going until the selected migration is completely done: run the migrator, inspect the report, fix migrated Codex instructions/skills/agents/MCP config, and re-run checks without stopping to ask for confirmation of the next step. If the user has selected a target, do not ask before creating, editing, replacing, or deleting generated Codex artifacts in that target (`AGENTS.md`, `.codex/`, `.agents/`, or `~/.codex/`). Preserve unrelated existing Codex config entries in `.codex/config.toml` or `~/.codex/config.toml`, such as `notify`, `projects`, `marketplaces`, or unrelated MCP servers; do not ask about them unless they fail validation or directly conflict with the migration. Do not edit source Claude Code files (`.claude/`, `~/.claude/`, `.mcp.json`, or `.claude.json`), unrelated project code, secrets, or another repository.

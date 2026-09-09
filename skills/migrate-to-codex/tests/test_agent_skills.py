@@ -99,19 +99,19 @@ class AgentSkillsTest(unittest.TestCase):
         for flags in ([], ["--replace"]):
             result = subprocess.run([str(ROOT / "bin/sync-from-claude"), *flags],
                                     env=environment, capture_output=True, text=True)
-            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertNotEqual(result.returncode, 0)
             self.assertEqual(target.read_text(), "Codex-specific guidance\n")
             self.assertTrue((self.agents / "skills").is_symlink())
             after = {p.relative_to(self.source): p.read_bytes()
                      for p in self.source.rglob("*") if p.is_file()}
             self.assertEqual(after, before)
 
-    def test_should_import_claude_skills_only_when_explicitly_selected(self) -> None:
+    def test_should_preserve_codex_skills_when_legacy_import_is_requested(self) -> None:
         environment, target = self.prepare_sync()
         result = subprocess.run([str(ROOT / "bin/sync-from-claude"), "--skills"],
                                 env=environment, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Claude guidance", target.read_text())
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual("Codex-specific guidance\n", target.read_text())
         self.assertTrue((self.agents / "skills").is_symlink())
 
 

@@ -1,23 +1,14 @@
 personality = "friendly"
 model = "gpt-6-astra"
 model_reasoning_effort = "high"
-project_doc_fallback_filenames = ["CLAUDE.md"]
+project_doc_fallback_filenames = []
 
 # Add behavioral guidance without replacing Codex's built-in instructions.
 developer_instructions = """
-Apply this guidance within the instruction hierarchy and the task's applicable AGENTS.md approval, review, and testing requirements.
-
-Infer intent and scope from the conversation. Treat action requests as authorization for the necessary work within that scope, and continue through implementation, appropriate verification, and reporting. Fill routine gaps with reasonable assumptions. Ask only when the answer materially affects the result or an explicit approval boundary requires it; continue independent authorized work while waiting. Prepare the authorized, reviewable work before requesting approval for the gated action. Earlier authorization remains valid within its original scope.
-
-Treat mid-task messages as updates to the active task unless the user clearly cancels or replaces it. Preserve completed work, answer side questions briefly, and resume the task.
-
-Within higher-priority constraints, explicit user instructions take precedence over skill guidelines. If a skill or instruction file makes you pause, request approval, or leave work unfinished, name and link to the exact file, quote the relevant instruction, and explain its application. Distinguish an explicit requirement from your interpretation; avoid adding approval steps based on hypothetical risk.
-
-Lead with the result and use concise, plain paragraphs. Use lists or tables when they improve comparison or scanning. Explain what changed, why, the relevant validation, and material limitations without repeating the work log or adding formulaic conclusions. Keep messages to other agents readable with proper spacing.
-
-When delegation is permitted, delegate bounded, independent tasks if it saves time or improves quality, and continue useful local work in parallel. Follow the applicable agent-selection and dispatch rules; keep dependent steps and overlapping edits sequential. The parent remains responsible for integrating and verifying the result.
-
-Run checks appropriate to the change and complete required tests and reviews. For reversible, low-impact edits, avoid new tests that merely mirror the implementation unless applicable rules require them. After checks pass, expand or repeat them only for new changes, failures, or unresolved concerns.
+Use the applicable AGENTS.md for personal conventions, approval boundaries, and required reviews.
+Carry the authorized task through implementation, relevant verification, and correction of failures caused by the change. Reuse existing authorization and passing checks while their scope and inputs remain valid.
+Ask only for missing decisions that materially affect the result or an explicit approval boundary; continue independent work while waiting. Prepare the reviewable work before requesting approval for a gated action.
+If an instruction causes a pause, identify its file and quote the applicable requirement. Distinguish an explicit boundary from your interpretation.
 """
 
 [tui]
@@ -34,11 +25,10 @@ trusted_hash = "sha256:81d639745c893712bed8af5c768a5f10e3131c8ece334fe48eb53f4e3
 
 [hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:1:0"]
 enabled = true
-trusted_hash = "sha256:07521182f20052fa3a8d2de345fe445baff39e1a5a05e98d111731c323168c20"
-
+trusted_hash = "sha256:6248010abdefb9f38e76e45d5f2ab223a375fa7238bf5aa3ca18b52b63c3df8e"
 [hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:2:0"]
 enabled = true
-trusted_hash = "sha256:efb41b80c7358aca2097c3028527421822beae6557448471229cf6936d4c0b15"
+trusted_hash = "sha256:6b4433f8ed7f2b2aae29b7e06234a19ab107f2b60493840957d820c77e1db565"
 [hooks.state."/Users/pullim/.codex/hooks.json:post_tool_use:0:0"]
 enabled = true
 trusted_hash = "sha256:40bc043554ee82db686638d37331d8910f32189e761dd0ef16c1e460cd2b81e4"

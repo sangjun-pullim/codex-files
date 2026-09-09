@@ -1,6 +1,6 @@
 ---
 name: "db-migrations"
-description: "Guide safe database migrations with Prisma \u2014 zero-downtime patterns, safety checklist, and common pitfalls. Prisma/PostgreSQL \ub9c8\uc774\uadf8\ub808\uc774\uc158 \uc804\uc6a9. raw SQL-only/\ube44-Prisma \ud504\ub85c\uc81d\ud2b8, \ud504\ub860\ud2b8\uc5d4\ub4dc/Electron \uc791\uc5c5\uc5d0\ub294 \uc0ac\uc6a9\ud558\uc9c0 \uc54a\uc74c."
+description: "Plan or review Prisma/PostgreSQL migrations. Excludes schema inspection without migration changes."
 ---
 
 # Database Migration Patterns (Prisma/PostgreSQL)
@@ -83,5 +83,3 @@ Then re-run `migrate deploy`. Check the real database state before choosing — 
 ## Reference
 
 Detailed examples (safe column addition, concurrent index, expand-contract rename, batched backfill PL/pgSQL, anti-pattern table) live in `reference.md` in this directory. Read it when you need the exact SQL/Prisma snippets.
-
-Apply any user-provided invocation text as additional task context.

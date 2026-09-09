@@ -1,6 +1,6 @@
 ---
 name: "impl-execute"
-description: "Execute an implementation plan and validate the result through a fresh-context review loop until the implementation fully matches the plan. Use this skill when the user says \"impl-execute\", \"/impl-execute\", \"implement this plan\", or provides a plan document and asks to build it. Also trigger when the user wants to implement changes from a spec in docs/impl-spec/."
+description: "Implement an approved plan in docs/impl-spec/, verify it, and complete its review and lifecycle steps."
 ---
 
 # Implementation Execution with Code-Verified Review Loop
@@ -23,7 +23,7 @@ Codex) carries the blind spot this loop exists to defeat.
   Clear them first (re-run `/impl-plan`, or dispose them by hand with evidence).
 - Record the base branch as `<base>` (`git rev-parse --abbrev-ref HEAD`).
 
-**Who implements**: you, unless the user asked for Codex ("codex로 구현", "GPT로 진행") — then
+**Who implements**: you, unless the user explicitly asked to delegate to a Codex CLI worker — then
 follow the Codex path below instead of Phase 1. Never switch to Codex on your own.
 
 **Delegated worker**: if a parent assigned you bounded implementation steps, implement only
@@ -50,7 +50,7 @@ session owns all phases below, including review and closing.
    Reuse passing results only while the code and inputs they cover remain unchanged; repeat
    checks when later changes, failures, or unresolved concerns invalidate those results.
 4. **Change summary** — steps completed, files changed with one line each, deviations from the
-   plan and why, and a **dependency map**: for each changed file, the files that import it. On a
+   plan and why, and a **dependency map** for changed interfaces or structure: affected callers and importers. On a
    resumed run cover every step in the spec, not only this session's.
 
 ## Phase 2: Review Loop
@@ -85,7 +85,7 @@ session owns all phases below, including review and closing.
 
 ## Codex path
 
-Load the `codex-delegation` skill first — it owns the codex dispatch contract; the mode question itself is the CLAUDE.md 워크트리 분리 rule. Steps 4 and 6 hold whatever the worker was; skip this load when the worker is not codex.
+Load the `codex-delegation` skill first — it owns the codex dispatch contract; the mode question itself is the AGENTS.md 워크트리 분리 rule. Steps 4 and 6 hold whatever the worker was; skip this load when the worker is not codex.
 
 1. **Split** the unchecked steps into workers with disjoint file sets. A step that changes an
    exported signature, schema, barrel, or shared type runs alone; a signature change and its
@@ -120,5 +120,3 @@ Load the `codex-delegation` skill first — it owns the codex dispatch contract;
    the cleanup the user runs after merging: `orca worktree rm --worktree path:<worktree>` per
    worker, then `git branch -D` on each worker branch and `<task>-integration`. Never remove a
    worktree holding uncommitted changes. Close the spec after the user merges.
-
-Apply any user-provided invocation text as additional task context.

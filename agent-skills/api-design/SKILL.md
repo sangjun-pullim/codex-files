@@ -1,6 +1,6 @@
 ---
 name: "api-design"
-description: "REST API design patterns for NestJS \u2014 resource naming, status codes, pagination, error responses, and validation. Only trigger for NestJS backend API projects, not for React/Next.js frontend or Electron projects."
+description: "Design or review NestJS REST endpoints, validation, pagination, and error contracts."
 ---
 
 # API Design Patterns
@@ -33,5 +33,3 @@ Decision checklist and workflow for designing a NestJS REST endpoint. For detail
 - [ ] Pagination for list endpoints (offset vs cursor — see reference.md)
 - [ ] Auth/authz required (or explicitly public)
 - [ ] No internal details leaked in error responses
-
-Apply any user-provided invocation text as additional task context.

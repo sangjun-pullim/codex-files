@@ -1,6 +1,6 @@
 ---
 name: "tdd"
-description: "Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions \"red-green-refactor\", or wants integration tests."
+description: "Develop test-first or add integration tests when the user requests that workflow."
 ---
 
 # Test-Driven Development
@@ -23,7 +23,7 @@ A **seam** is the public boundary you test at: the interface where you observe b
 interface to select the boundaries under test, state the choice, and proceed. Reuse prior
 seam decisions. Ask when the choice materially changes the public interface or task scope,
 or when the user explicitly requested approval before selecting seams. This decision controls
-where tests go, never whether required tests are written; see the global `CLAUDE.md` Hard Rules.
+where tests go, never whether required tests are written; see the global `AGENTS.md` approval and review boundaries.
 
 When the shape of that interface is itself in question — how deep the module is, where the seam belongs, what the interface should expose — read and follow `~/.agents/skills/codebase-design/SKILL.md` for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
 

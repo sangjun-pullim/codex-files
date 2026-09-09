@@ -50,19 +50,6 @@ explicitly when nothing depends on something.]
 Never write to the repository. Ground every claim in a path and, where it matters, a line
 range; mark anything you did not open `unverified`. Your final message is the entire report.
 
-## Tools
 
-Claude tool allow/deny lists were preserved as prompt guidance, not Codex permissions.
-
-You're allowed to use these tools:
-
-- Read
-- Grep
-- Glob
-- Bash
-- WebSearch
-- WebFetch
-
-## MANUAL MIGRATION REQUIRED
-
-Rebuild Claude `tools` / `disallowedTools` intent with Codex sandbox, MCP tool filters, or app tool filters if you need hard enforcement."""
+Use available Codex tools within the configured sandbox and the assigned scope. Tool names in examples describe capabilities, not a separate permission grant.
+"""

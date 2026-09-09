@@ -30,25 +30,30 @@ python3 ~/.codex/bin/link-agent-skills.py
 서로 다르거나 다른 곳을 가리키는 링크가 있으면 중단하므로, 필요한 로컬 변경을
 `agent-skills/`에 반영한 뒤 다시 실행합니다. 설치 스크립트는 Claude 파일을 수정하지 않습니다.
 
-## Claude에서 선택적으로 가져오기
+## Codex 독립 설정
 
-Claude 설정이 있는 기기에서는 필요한 경우 다음 명령으로 전역 지침·에이전트 등
-기존 동기화 항목을 갱신합니다. 기본 실행은 Codex 스킬을 보존합니다.
+`AGENTS.md`, `rules/`, `agents/`, `agent-skills/`, `hooks/`는 Codex 원본입니다.
+Claude 설정에서 동기화하지 않습니다. `bin/sync-from-claude`는 어떤 옵션으로 실행해도
+파일을 변경하지 않고 종료합니다. 전역 지침과 스킬은 이 저장소에서 직접 수정합니다.
+
+`config.toml`의 추가 지침은 실행 지속성과 승인 경계 해석만 다룹니다.
+개인 규칙은 `AGENTS.md`, 작업별 절차는 스킬과 필요할 때 읽는 참조 파일에 둡니다.
+프로젝트별 규칙은 `AGENTS.md`를 사용하며 `CLAUDE.md` 자동 fallback은 사용하지 않습니다.
+
+Orca는 별도 `CODEX_HOME`을 사용합니다. 현재 계정의 `AGENTS.md`, `rules`, 에이전트 파일은
+이 저장소를 참조하고, 계정 config의 개인 지침과 fallback 설정은 같은 값으로 유지합니다.
+계정별 인증·MCP·모델·훅 승인 상태는 전체 config 복사로 덮어쓰지 않습니다.
+훅 경로 변경에 필요한 신뢰 승인은 Codex UI에서 처리하고 승인 해시를 직접 만들지 않습니다.
+
+`skills/migrate-to-codex/`는 명시적으로 요청된 별도 마이그레이션용 도구로만 보관합니다.
+개인 설정을 다시 Claude 기반으로 바꾸는 용도로 실행하지 않습니다.
+비밀 파일 차단 훅은 `jq`를 사용합니다.
+
+검증:
 
 ```bash
-~/.codex/bin/sync-from-claude
+python3 -m unittest discover -s skills/migrate-to-codex/tests
 ```
-
-Claude 스킬과 명령도 가져오려면 `--skills`를 명시합니다.
-이 옵션은 같은 이름의 Codex 스킬 수정을 덮어쓸 수 있으므로 먼저 미리보기를 확인합니다.
-
-```bash
-~/.codex/bin/sync-from-claude --skills --dry-run
-~/.codex/bin/sync-from-claude --skills
-git -C ~/.codex diff -- agent-skills/
-```
-
-동기화 스크립트는 Python 3.11 이상을 사용하며, 비밀 파일 차단 훅은 `jq`를 사용합니다.
 
 ## 버전 관리 범위
 

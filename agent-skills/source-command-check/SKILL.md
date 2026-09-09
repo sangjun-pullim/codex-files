@@ -1,23 +1,12 @@
 ---
 name: "source-command-check"
-description: "Quick check \u2014 run lint, type check, and tests during development (use /verify for full pre-push validation)"
+description: "Run a quick development check when the user requests check or lint, types, and tests."
 ---
 
-# source-command-check
+# Quick development check
 
-Use this skill when the user asks to run the migrated source command `check`.
-
-## Command Template
-
-Check the project's package.json to identify available scripts, then run the following in order:
-
-1. Lint — auto-fix what can be fixed
-2. Type check (if TypeScript project) — fix any errors
-3. Tests — fix failures
-4. If all pass, provide a one-line summary of changes
-
-If a step has issues, fix them before moving to the next.
-Only report problems that cannot be auto-fixed.
-
-Apply any user-provided invocation text as additional task context.
-
+Read the project's scripts and run the applicable lint, type, and test checks using its
+existing package manager and runner. Reuse passing results covering unchanged inputs.
+Fix failures caused by the requested change and rerun affected checks; report unrelated
+baseline failures without expanding scope. Limit formatting or lint fixes to the task's files.
+Report passed, failed, and unavailable checks. Use `verify` for a PR/push workflow's checks.

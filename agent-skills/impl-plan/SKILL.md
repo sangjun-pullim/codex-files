@@ -1,6 +1,6 @@
 ---
 name: "impl-plan"
-description: "Analyze impact scope and create an implementation plan, then validate it through a fresh-context code-review loop until no issues remain. Use this skill when the user asks to plan implementation, create an impl spec, or says \"impl-plan\", \"/impl-plan\". Also trigger when the user has a detailed spec/plan document and wants it verified against actual code."
+description: "Create or verify an implementation plan when requested, or when AGENTS.md requires approval before implementation."
 ---
 
 # Implementation Plan with Code-Verified Review Loop
@@ -12,21 +12,17 @@ and skipped patterns.
 
 ## Do NOT use when
 
-- The change touches under 5 production files — plan inline instead (a risk surface still needs tests and a reviewer per `CLAUDE.md` Hard Rules, not a spec)
+- A small change needs no written plan and the user did not request one — plan inline; AGENTS.md still controls required tests and reviews.
 - The problem itself is still vague — sharpen it with `grilling` first
 - An approved spec already exists and it is time to build — `impl-execute`
 
 ## Phase 0: Requirements
 
-- If `docs/PRD.md` exists, load it and find the `## Scope` subsection covering this work.
-  If the request contradicts the PRD (`## Non-goals`, or a `## Scope` statement), surface the
-  mismatch before planning: an intent change means proposing a PRD update first; a mistaken
-  request means correcting course. If the `second-brain` skill's PRD criteria apply and no
-  `## Scope` subsection exists, suggest adding it first; proceed without it only on the user's call.
-- Before drafting, be able to state: the goal in one sentence, in-scope / out-of-scope, at least
-  one pass/fail acceptance check, and the files the change lands in. Anything you cannot state
-  from what the user or the PRD said, ask — one question at a time, using a concise plain-text question with
-  2–4 concrete options.
+- Consult relevant PRD scope/non-goals when product intent affects this plan. Surface
+  contradictions requiring a user decision; missing documentation alone is not a gate.
+- State the goal, scope, acceptance checks, and affected files. Discover facts from code and
+  resolve routine choices using existing conventions. Ask only for missing decisions that
+  materially change the result; bundle independent questions and continue independent analysis.
 
 ## Phase 1: Plan Creation
 
@@ -36,8 +32,8 @@ a `risk-surface` field if its frontmatter predates it (an old `tier` field can s
 Phase 2. For editing a step already marked `[x]`, see the `second-brain` skill's impl-spec
 Lifecycle.
 
-1. **Scope analysis** — spawn a `planner` agent with the requirements above. Resolve any
-   `## Open Questions` it returns with the user before drafting; nothing downstream reopens them.
+1. **Scope analysis** — spawn a `planner` agent with the requirements above. Resolve factual
+   questions through inspection; bring only material scope/design decisions to the user.
 2. **Draft the spec** in the Output Format below. The planner's reverse dependencies and existing
    patterns go into `## Affected Dependents` and the steps — the implementer never sees the scope
    analysis, so the spec is how they reach it.
@@ -69,8 +65,8 @@ Lifecycle.
 ## Phase 3: Present
 
 Present the spec path, the risk surface recorded in its frontmatter, what the review rounds
-found and fixed, and any remaining MEDIUM/LOW notes. Implementation runs through
-`/impl-execute` on this spec — do not start implementing here.
+found and fixed, and any remaining MEDIUM/LOW notes. For a planning-only request, stop after presenting the reviewed spec. If implementation
+is already authorized and applicable approval gates are satisfied, continue with `impl-execute`.
 
 ## Output Format
 
@@ -120,5 +116,3 @@ Every step heading carries a progress marker: `[ ]` unstarted, `[x]` implemented
 | Finding | Severity | Disposition | Rationale |
 |---------|----------|-------------|-----------|
 ```
-
-Apply any user-provided invocation text as additional task context.

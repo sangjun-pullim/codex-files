@@ -1,6 +1,6 @@
 ---
 name: "source-command-init-docs"
-description: "Scaffold standard Second Brain docs/ structure and populate content from codebase analysis"
+description: "Initialize project docs from the codebase when the user asks to scaffold documentation."
 ---
 
 # source-command-init-docs
@@ -41,7 +41,7 @@ Before creating each standard file, check if a similar file already exists:
 
 Before writing any docs, thoroughly explore the project to gather real content:
 
-- **ARCHITECTURE.md**: Read `CLAUDE.md`, `package.json`, key entry points (`src/main.ts`, `src/app.module.ts`, etc.), and module directories. Identify modules, their responsibilities, data flow, and external integrations.
+- **ARCHITECTURE.md**: Read `AGENTS.md`, `package.json`, key entry points (`src/main.ts`, `src/app.module.ts`, etc.), and module directories. Identify modules, their responsibilities, data flow, and external integrations.
 - **DB-SCHEMA.md**: Read `prisma/schema.prisma`. Extract all models, relations, indexes, enums, and notable `@map`/`@@map` mappings.
 - **API-SPEC.md**: Find all controllers/routes. Extract endpoints, HTTP methods, request/response DTOs, guards, and decorators.
 - **FRONTEND-ARCHITECTURE.md**: Scan component tree, routing config, state management setup, and key page components.
@@ -49,7 +49,7 @@ Before writing any docs, thoroughly explore the project to gather real content:
 - **ADR.md**: Check git log and existing comments/docs for any architectural decisions already made.
 - **BUG-FIXES.md**: Start with an empty log structure (no fake entries).
 - **PRD.md**: do NOT derive from code — intent is not in the code. Create `docs/PRD.md` with the section headings from the `second-brain` skill only and leave the content to the user; suggest a `grilling` session to fill it if the product intent is unclear.
-- **GLOSSARY.md**: Collect domain terms from model names, service names, and CLAUDE.md; map each business term to its canonical code identifier with a one-line definition and banned aliases (format in the `second-brain` skill). Only include terms with real confusion potential — never pad with obvious vocabulary.
+- **GLOSSARY.md**: Collect domain terms from model names, service names, and AGENTS.md; map each business term to its canonical code identifier with a one-line definition and banned aliases (format in the `second-brain` skill). Only include terms with real confusion potential — never pad with obvious vocabulary.
 
 Use the Explore agent or parallel search agents to gather information efficiently. Do NOT guess — only document what you can confirm from the code.
 
@@ -66,9 +66,9 @@ Guidelines for content:
 - For `BUG-FIXES.md`, create only the empty log structure — do not fabricate entries
 - Keep each file focused and scannable. Aim for completeness over length
 
-## Step 6: Check CLAUDE.md Documentation Section
+## Step 6: Check AGENTS.md Documentation Section
 
-Read the project root `CLAUDE.md`:
+Read the project root `AGENTS.md`:
 - If `## Documentation` section exists: report OK
 - If missing: suggest the following text to add (do NOT auto-modify):
 
@@ -93,13 +93,10 @@ Output a summary table:
 | DB-SCHEMA.md | CREATED / SKIPPED(not needed) / EXISTS | ... |
 | ... | ... | ... |
 
-### CLAUDE.md
+### AGENTS.md
 - Documentation section: EXISTS / SUGGESTED (see above)
 
 ### Summary
 - Created N files with content populated from codebase analysis
 - [Any notable findings or gaps worth mentioning]
 ```
-
-Apply any user-provided invocation text as additional task context.
-

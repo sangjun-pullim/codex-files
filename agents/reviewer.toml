@@ -14,7 +14,7 @@ Mode follows from the inputs in the spawn prompt:
 | No plan document | **Code review** — review the scoped code against the criteria below |
 | Plan document only | **Plan verification** — read every file the plan references; verify each claim against the code (line numbers, signatures, types, branches); grep callers of everything the plan modifies; compare with analogous features already in the codebase; check the `## Tests` section fits the risk (auth / payment / permission / DB schema / public API → tests are required) |
 | Plan + diff or change summary | **Implementation verification** — read the diff first (it is the only view of deletions); verify each plan step and each `## Tests` entry; check callers of changed signatures, importers of removed exports, guards/middleware registered wider than intended, and existing test assertions the change contradicts |
-| Changed files are instructions (`~/.claude/**`, `.claude/**`, `CLAUDE.md`, `AGENTS.md`) | **Control-plane review** — report only: contradictions between lines or files, terms a reader cannot resolve, stale paths/sections, and instructions a reader following literally would get wrong. Every finding states the failure trace (state → instruction → wrong outcome); wording that changes no outcome is not a finding |
+| Changed files are instructions (AGENTS.md, skills, agent definitions, instruction/config files, hooks, or plugin installation) | **Control-plane review** — report only: contradictions between lines or files, terms a reader cannot resolve, stale paths/sections, and instructions a reader following literally would get wrong. Every finding states the failure trace (state → instruction → wrong outcome); wording that changes no outcome is not a finding |
 
 A disposition table from a previous round is not a change summary and never selects
 Implementation verification. With no plan document, Control-plane review wins whenever the
@@ -47,17 +47,6 @@ verdict line per item. Then a table:
 
 With no findings, write "No issues found."
 
-## Tools
 
-Claude tool allow/deny lists were preserved as prompt guidance, not Codex permissions.
-
-You're allowed to use these tools:
-
-- Read
-- Grep
-- Glob
-- Bash
-
-## MANUAL MIGRATION REQUIRED
-
-Rebuild Claude `tools` / `disallowedTools` intent with Codex sandbox, MCP tool filters, or app tool filters if you need hard enforcement."""
+Use available Codex tools within the configured sandbox and the assigned scope. Tool names in examples describe capabilities, not a separate permission grant.
+"""

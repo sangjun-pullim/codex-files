@@ -1,13 +1,13 @@
 ---
 name: "codex-delegation"
-description: "Rules for delegating implementation to OpenAI Codex CLI through a codex-worker agent \u2014 the worker-vs-direct rule, the orca worktree vs in-place mode question, dispatch, gating, and union review. Use when the user asks for codex or GPT to implement something (\"codex\ub85c \uad6c\ud604\", \"codex\ud55c\ud14c \uc2dc\ucf1c\", \"GPT\ub85c \uc9c4\ud589\"), or before the first codex-worker spawn of any task."
+description: "Delegate implementation to a Codex CLI worker when explicitly requested. Ordinary work in Codex is not delegation."
 ---
 
 # Codex (GPT) Delegation
 
 ## Do NOT use when
 
-- The user did not ask for codex. You implement by default; switching to delegation on your own
+- The user did not explicitly ask to delegate to a Codex CLI worker. Ordinary requests to the current Codex session do not count. You implement by default; switching to delegation on your own
   initiative is forbidden, and a plan being large is not a reason.
 - Planning or reviewing — `codex-worker` is implementation-only. A one-off fix needs no spec
   file; a multi-step change does (`impl-plan` first).
@@ -16,7 +16,7 @@ description: "Rules for delegating implementation to OpenAI Codex CLI through a 
 
 - **Always run codex through a `codex-worker` spawn — never `codex exec` from your own Bash.** The worker absorbs codex's output (measured: 167k tokens of codex traffic in, ~1.2k reported back); running it yourself puts all that traffic in the top model's context. In-place mode — no Orca card to show for the spawn — is exactly where skipping the worker is most tempting. Only exception: a one-line diagnostic (`codex exec -s read-only "…"` to confirm codex itself works).
 - `codex-worker` default is orca worktree mode: each worker creates an Orca worktree, runs codex there, and shows as a card in the Orca dashboard.
-- The worktree/in-place question is the CLAUDE.md **워크트리 분리** rule; it fires before the first codex-worker spawn of each task. The answer covers every worker spawned for that task — never re-ask per worker. Task boundary: a user request whose work is NOT covered by the current task's plan = new task → re-ask; rework/follow-up on the same plan keeps the original answer. When in-place is chosen, state "in-place mode" in the spawn prompt.
+- The worktree/in-place question is the AGENTS.md **워크트리 분리** rule; it fires before the first codex-worker spawn of each task. The answer covers every worker spawned for that task — never re-ask per worker. Task boundary: a user request whose work is NOT covered by the current task's plan = new task → re-ask; rework/follow-up on the same plan keeps the original answer. When in-place is chosen, state "in-place mode" in the spawn prompt.
 - In-place mode is single-worker: workers run one at a time in the shared checkout. If the task plans 2+ parallel workers, recommend orca worktree mode in the question (mention in-place would serialize them).
 - Skip the question and use in-place mode when `orca status` fails (Orca not running).
 - Worker branches are NOT merged by the worker, and never onto the base branch — that stays the user's call. Union assembly: `impl-execute` Codex path.

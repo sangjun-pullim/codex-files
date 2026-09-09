@@ -1,6 +1,6 @@
 ---
 name: "source-command-docs-sync"
-description: "Check if project CLAUDE.md and docs/ are in sync with the actual codebase"
+description: "Audit or synchronize project instructions and docs against the code when requested."
 ---
 
 # source-command-docs-sync
@@ -9,9 +9,9 @@ Use this skill when the user asks to run the migrated source command `docs-sync`
 
 ## Command Template
 
-Audit the project's CLAUDE.md and docs/ files against the current codebase state. Do NOT modify files except after explicit user approval; the `verified-against` stamp bump is the only write that follows automatically from the user confirming the sync report (see Part 3).
+Audit the project's AGENTS.md and docs/ files against the current codebase state. Do NOT modify files except after explicit user approval; the `verified-against` stamp bump is the only write that follows automatically from the user confirming the sync report (see Part 3).
 
-## Part 1: CLAUDE.md Sync
+## Part 1: AGENTS.md Sync
 
 1. **Stack & Dependencies**: Compare `package.json` dependencies with documented tech stack
 2. **Directory Structure**: Verify documented structure matches actual `ls` output
@@ -25,8 +25,8 @@ Audit the project's CLAUDE.md and docs/ files against the current codebase state
 7. **Docs Existence**: Check `docs/` folder for standard Second Brain files.
    - Report which standard files exist vs missing (PRD.md, ARCHITECTURE.md, DB-SCHEMA.md, API-SPEC.md, FRONTEND-ARCHITECTURE.md, BUSINESS-LOGIC.md, ADR.md, BUG-FIXES.md, GLOSSARY.md — flag PRD.md and GLOSSARY.md as missing only per the `second-brain` skill's required-when/creation criteria)
    - A legacy lowercase file (`decisions.md` for `ADR.md`, etc.) counts as EXISTS — report it as `EXISTS (legacy name)` and add a `git mv` rename to the uppercase name in Suggested Updates (apply only with user approval)
-   - Check if CLAUDE.md has `## Documentation` section with lazy-load references to `docs/`
-   - If CLAUDE.md has inline content (Architecture/DB Schema/API sections longer than 20 lines), suggest extracting to `docs/`
+   - Check if AGENTS.md has `## Documentation` section with lazy-load references to `docs/`
+   - If AGENTS.md has inline content (Architecture/DB Schema/API sections longer than 20 lines), suggest extracting to `docs/`
 
 ## Part 3: docs/ Content Sync
 
@@ -76,7 +76,7 @@ Scan `BUG-FIXES.md` for recurring patterns — 2+ entries sharing a root-cause c
 For each recurring pattern, propose ONE promotion target (most durable first):
 1. **Test** — a regression test that pins the behavior
 2. **Lint rule / hook** — a mechanical check that blocks the pattern
-3. **CLAUDE.md line** — only if not machine-checkable; must be a checkable condition per the `writing-for-agents` skill's `## Control-plane files`
+3. **AGENTS.md line** — only if not machine-checkable; must be a checkable condition per the `writing-for-agents` skill's `## Control-plane files`
 
 For entries already covered by an existing guard, propose compaction: compress to a one-line reference (`- <date> <title> → promoted to <guard>`). Promotion doubles as compaction — this keeps the file from growing unboundedly.
 
@@ -87,7 +87,7 @@ Report only; apply promotions and compaction after user approval.
 ```
 ## Docs Sync Report
 
-### CLAUDE.md
+### AGENTS.md
 | Category | Status | Details |
 |----------|--------|---------|
 | Stack | OK/DRIFT | ... |
@@ -126,7 +126,4 @@ Report only; apply promotions and compaction after user approval.
 - (stamp additions/bumps for confirmed docs)
 ```
 
-If no CLAUDE.md exists at project root, offer to create one by scanning the codebase.
-
-Apply any user-provided invocation text as additional task context.
-
+If no AGENTS.md exists at project root, offer to create one by scanning the codebase.

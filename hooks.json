@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/block-env-commit.sh"
+            "command": "/bin/bash /Users/pullim/.codex/hooks/block-env-commit.sh"
           }
         ],
         "matcher": "Bash"
@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/block-dangerous-git.sh"
+            "command": "/bin/bash /Users/pullim/.codex/hooks/block-dangerous-git.sh"
           }
         ],
         "matcher": "Bash"

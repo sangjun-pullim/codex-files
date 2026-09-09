@@ -1,6 +1,6 @@
 ---
 name: "grilling"
-description: "Clarify a half-formed problem, plan, or design by questioning the user relentlessly, in frontier rounds, until it is sharp. Trigger on \"grill me\", \"grill this\", \"\uac08\uad88\uc918\", \"\ud138\uc5b4\uc918\", \"\uce90\ubb3c\uc5b4\uc918\", \"\uc9c8\ubb38 \uc880 \ud574\uc918\", \"stress-test this\", \"poke holes in this\", \"what am I missing\" \u2014 or whenever the user wants to talk a vague idea into a clear one before anything gets built."
+description: "Question and stress-test an idea when the user asks to clarify it before building. Excludes clear implementation requests."
 ---
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
