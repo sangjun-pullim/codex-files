@@ -13,6 +13,10 @@ Use this skill when the user asks to run the migrated source command `commit`.
 2. Run a `reviewer` agent on the diff — write it to a file and pass the path, plus the changed-file list. Skip only for prose/doc changes that touch no control-plane file (`AGENTS.md` approval and review boundaries)
 3. Analyze the changes
 4. Generate a Conventional Commits message
+   - When the subject alone cannot explain the reason or impact, add a concise Korean body
+     after a blank line. Summarize the meaningful changes and why they were needed; include
+     relevant verification results only when actually performed. Simple changes may use only
+     a subject; do not repeat it or list every changed file in the body.
    - If multiple logical changes are mixed, suggest splitting into separate commits
 5. If the user already authorized committing these changes, show the message and commit after
    the required review. Otherwise show the proposed message and request approval. Honor an
