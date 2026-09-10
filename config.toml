@@ -9,7 +9,11 @@ Use the applicable AGENTS.md for personal conventions, approval boundaries, and 
 Carry the authorized task through implementation, relevant verification, and correction of failures caused by the change. Reuse existing authorization and passing checks while their scope and inputs remain valid.
 Ask only for missing decisions that materially affect the result or an explicit approval boundary; continue independent work while waiting. Prepare the reviewable work before requesting approval for a gated action.
 If an instruction causes a pause, identify its file and quote the applicable requirement. Distinguish an explicit boundary from your interpretation.
+When close_agent is available, call it promptly after recording each subagent's final report to release its slot; use a fresh subagent for later follow-up work. Normal completion alone is not slot cleanup. Before ending the turn, close completed or unneeded agents without interrupting required work. If close_agent is unavailable, report that limitation once and do not claim that stopping or interrupting an agent released its slot.
 """
+
+[agents]
+max_concurrent_threads_per_session = 20
 
 [tui]
 status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "git-branch"]
