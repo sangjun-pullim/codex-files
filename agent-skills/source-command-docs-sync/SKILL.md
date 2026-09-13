@@ -9,7 +9,11 @@ Use this skill when the user asks to run the migrated source command `docs-sync`
 
 ## Command Template
 
-Audit the project's AGENTS.md and docs/ files against the current codebase state. Do NOT modify files except after explicit user approval; the `verified-against` stamp bump is the only write that follows automatically from the user confirming the sync report (see Part 3).
+Compare the requested project instructions and docs against the current codebase. For an
+audit/review-only request, report findings and proposed edits without writing, including
+stamps. When synchronization or edits are already requested or approved, apply the
+in-scope corrections and verified stamps without another confirmation. Unclear intent
+defaults to an audit. Follow AGENTS.md's independent review and permission boundaries.
 
 ## Part 1: AGENTS.md Sync
 
@@ -24,7 +28,7 @@ Audit the project's AGENTS.md and docs/ files against the current codebase state
 
 7. **Docs Existence**: Check `docs/` folder for standard Second Brain files.
    - Report which standard files exist vs missing (PRD.md, ARCHITECTURE.md, DB-SCHEMA.md, API-SPEC.md, FRONTEND-ARCHITECTURE.md, BUSINESS-LOGIC.md, ADR.md, BUG-FIXES.md, GLOSSARY.md — flag PRD.md and GLOSSARY.md as missing only per the `second-brain` skill's required-when/creation criteria)
-   - A legacy lowercase file (`decisions.md` for `ADR.md`, etc.) counts as EXISTS — report it as `EXISTS (legacy name)` and add a `git mv` rename to the uppercase name in Suggested Updates (apply only with user approval)
+   - A legacy lowercase file (`decisions.md` for `ADR.md`, etc.) counts as EXISTS — report it as `EXISTS (legacy name)`. Rename only when renaming is part of the authorized scope; content synchronization alone does not require it.
    - Check if AGENTS.md has `## Documentation` section with lazy-load references to `docs/`
    - If AGENTS.md has inline content (Architecture/DB Schema/API sections longer than 20 lines), suggest extracting to `docs/`
 
@@ -38,7 +42,9 @@ Before any deep comparison: skip the files the `second-brain` skill exempts from
   - Empty diff → mark the doc **OK (stamp-verified)** and SKIP its deep comparison below.
   - Non-empty diff → deep-compare ONLY against the changed files (the diff is the scope).
 - Stamp missing → full comparison as below, and suggest adding a stamp in the report.
-- After the user confirms a doc is in sync, bump its `verified-against` to current HEAD (the one allowed write).
+- In an authorized synchronization, update `verified-against` to the commit whose source
+  state was verified. Do not stamp uncommitted source changes as verified against HEAD.
+  For an audit-only request, report the proposed stamp without writing it.
 
 ### Full comparison
 
@@ -67,7 +73,9 @@ Audit `docs/impl-spec/` against the lifecycle in the `second-brain` skill. Specs
 2. **Closed-but-not-archived**: for each top-level spec with `status: active`, look for completion evidence — a merged PR/commit referencing the spec number, or the spec body itself declaring 구현/완료. Evidence found → propose `status: done` + `git mv` into `docs/impl-spec/archive/` **only when `impl-execute` Phase 3 step 1's close conditions all hold — read them there, do not work from memory**. Any `UNRESOLVED` row in the spec's `## Review Notes` is a mechanical no: flag it as "close via `/impl-execute`". This command is not a second door to `done`. (Shelved/paused specs stay top-level as `active` with the pause noted in the body.)
 3. **Archived-but-active**: files inside `archive/` whose status is still `active` → flag (must be `done` or `superseded-by`).
 
-Report findings in the table; apply frontmatter additions and moves only after user approval (same write policy as Part 3 stamp bumps).
+Report findings in the table. Apply frontmatter corrections within the authorized scope;
+archive moves require lifecycle maintenance to be included in that scope and all close
+conditions above to hold. An audit-only request leaves both unchanged.
 
 ## Part 5: BUG-FIXES.md Promotion
 
@@ -76,11 +84,14 @@ Scan `BUG-FIXES.md` for recurring patterns — 2+ entries sharing a root-cause c
 For each recurring pattern, propose ONE promotion target (most durable first):
 1. **Test** — a regression test that pins the behavior
 2. **Lint rule / hook** — a mechanical check that blocks the pattern
-3. **AGENTS.md line** — only if not machine-checkable; must be a checkable condition per the `writing-for-agents` skill's `## Control-plane files`
+3. **AGENTS.md line** — only if not machine-checkable; use a concrete condition and follow
+   [writing-for-agents Review](../writing-for-agents/SKILL.md#review).
 
 For entries already covered by an existing guard, propose compaction: compress to a one-line reference (`- <date> <title> → promoted to <guard>`). Promotion doubles as compaction — this keeps the file from growing unboundedly.
 
-Report only; apply promotions and compaction after user approval.
+Report promotion candidates. Creating tests, lint rules, hooks, or new agent instructions
+requires authorization for those changes; a content sync alone does not authorize them.
+Apply already-approved promotions and compaction without re-asking, with required review.
 
 ## Output
 

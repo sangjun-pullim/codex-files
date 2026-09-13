@@ -21,5 +21,5 @@ Handles: the worker's is `startupTerminal.handle` from the create response (see 
 - `worker_done` moves the task to `completed` by itself (measured). Reach for `task-update --status failed|completed` only for a task that ended without one — refused, abandoned, or stopped by you.
 - One pane holds one active dispatch. `task-update` does not release it and no command clears it, so send a retry to a fresh pane.
 - Read `dispatch --dry-run --return-preamble` to see exactly what the worker will be told.
-- Assembly and review follow `impl-execute` Phase 2 and its Codex path steps 4 and 6 whatever the worker was — step 6 is what keeps the spec open while the integration branch is unmerged. Worker branches stay off the base branch — AGENTS.md **Merging is the user's call**.
+- Assembly and review follow `impl-execute` Phase 2 and [delegated execution](../../impl-execute/references/delegated-execution.md) steps 4 and 6 whatever the worker was — step 6 is what keeps the spec open while the integration branch is unmerged. Worker branches stay off the base branch — AGENTS.md **Merging is the user's call**.
 - `orchestration reset` has no per-task scope — it clears every task or every message at once.

@@ -10,7 +10,10 @@ Use this skill when the user asks to run the migrated source command `commit`.
 ## Command Template
 
 1. Check `git diff --staged` (if empty, check `git diff`)
-2. Run a `reviewer` agent on the diff — write it to a file and pass the path, plus the changed-file list. Skip only for prose/doc changes that touch no control-plane file (`AGENTS.md` approval and review boundaries)
+2. Establish independent review of the commit's diff. Reuse valid reviewer evidence under
+   AGENTS.md's review-reuse rule; review later changes and affected context. When a review
+   is needed, provide the patch path and changed-file list to a `reviewer`. Only prose/doc
+   changes touching no control-plane file are exempt from independent review.
 3. Analyze the changes
 4. Generate a Conventional Commits message
    - When the subject alone cannot explain the reason or impact, add a concise Korean body

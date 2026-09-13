@@ -23,7 +23,11 @@ If the work was accidentally run outside Orca orchestration, say so plainly. To 
 - Track task DAGs with dependencies.
 - Run coordinator loops or decision gates.
 
-Do not use orchestration merely because the user says "hand off", "handoff", "handover", "give this to another agent", or asks for another worktree/agent/model/effort. Those are full ownership transfers unless the user explicitly asks to supervise, monitor, wait for worker completion/results, coordinate a DAG, use decision gates, or keep a blocking ask/reply loop.
+Use tracked Orca orchestration only when supervised coordination is requested or the
+applicable supervised-dispatch workflow requires it. A request for another worktree,
+agent, model, or effort alone authorizes neither tracked orchestration nor ownership
+transfer. Follow [Full Handoffs](../../orca-cli/references/handoffs.md) when responsibility
+for completion is explicitly transferred.
 
 
 ## Preconditions

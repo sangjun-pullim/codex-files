@@ -37,7 +37,8 @@ Keep diagrams compact enough that before/after sits side by side without scrolli
 
 ## Tone
 
-Plain prose (Korean is fine — the architectural nouns stay canonical), concise. Concision is not an excuse to drift: every architectural noun and verb comes from the `codebase-design` skill — use its canonical terms, never its banned aliases.
+Use concise prose and the project's existing identifiers and domain terminology. Apply
+`codebase-design` definitions when discussing its design concepts.
 
 **Phrasings that fit the style:**
 

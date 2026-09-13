@@ -11,4 +11,4 @@ description: "Resolve an in-progress Git merge or rebase conflict."
 
 4. Discover the project's **automated checks** and run them — typically typecheck, then tests, then format. Fix anything the merge broke.
 
-5. **Finish the merge/rebase.** Only when every hunk is resolved — a conflict left for the user means the merge stays in progress and nothing is committed. Stage everything and commit. If rebasing, continue the rebase process until all commits are rebased.
+5. **Finish the merge/rebase.** Only when every hunk is resolved — a conflict left for the user means the merge stays in progress and nothing is committed. Stage only the resolved paths and necessary follow-up fixes. Inspect the complete staged diff before committing so unrelated user changes, including pre-staged changes, are not included; preserve them without resetting or stashing them without authorization. If unrelated staged work prevents safe completion, report that boundary and ask how to preserve it. If rebasing, continue the rebase process until all commits are rebased.

@@ -9,7 +9,7 @@ Surface architectural friction and propose **deepening opportunities** — refac
 
 This command is _informed_ by the project's domain model and built on a shared design vocabulary:
 
-- Read and follow `~/.agents/skills/codebase-design/SKILL.md` — it owns the architecture vocabulary and principles. Use its canonical terms exactly in every suggestion; never substitute an alias it bans.
+- Read `~/.agents/skills/codebase-design/SKILL.md` for design concepts; preserve the project's actual identifiers and domain terminology.
 - The domain language in `docs/GLOSSARY.md` gives names to good seams; `docs/ADR.md` records decisions this command should not re-litigate.
 
 ## Process
@@ -39,7 +39,7 @@ Publish the review as an Artifact. Load the `artifact-design` and `artifact-diag
 
 Render one card per candidate and a closing **Top recommendation** — [REPORT.md](REPORT.md) owns the card anatomy, report structure, diagram patterns, and vocabulary rules.
 
-**Use `docs/GLOSSARY.md` vocabulary for the domain, and the codebase-design vocabulary for the architecture.** If the glossary defines "정산" as `settlement`, talk about "the settlement module" — not "the FooBarHandler," and not a banned alias.
+**Use the project's domain vocabulary and identifiers, with codebase-design definitions for design concepts.** If the glossary defines "정산" as `settlement`, use that term and name the relevant concrete service or component when it helps locate the code.
 
 **Decision conflicts**: if a candidate contradicts an entry in `docs/ADR.md`, only surface it when the friction is real enough to warrant revisiting the decision. Mark it clearly in the card (e.g. a warning callout: _"contradicts the 2026-03 event-sourcing decision — but worth reopening because…"_). Don't list every theoretical refactor a past decision forbids.
 

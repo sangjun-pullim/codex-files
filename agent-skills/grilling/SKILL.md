@@ -3,9 +3,13 @@ name: "grilling"
 description: "Question and stress-test an idea when the user asks to clarify it before building. Excludes clear implementation requests."
 ---
 
-Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
+Clarify the idea the user asked to explore. Map material decisions as a **design tree**;
+omit routine choices that existing conventions or the user's stated preferences already resolve.
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+Work the tree in **rounds**. The **frontier** contains unresolved decisions that materially
+affect the requested outcome and whose prerequisites are settled. Group related questions
+into a manageable round and give your recommendation. Wait for answers before dependent
+decisions, while continuing independent analysis.
 
 Each question should be formatted like so:
 
@@ -21,7 +25,10 @@ Finding _facts_ is your job, never the user's. When a frontier question needs a 
 
 Challenge terms the moment they conflict with `docs/GLOSSARY.md` ("glossary는 X라고 정의하는데 지금 Y 의미로 쓰신 것 같아요 — 어느 쪽인가요?"), and sharpen vague or overloaded terms into a canonical one. Collect the domain terms and decisions that settle along the way (per the recording criteria in the `second-brain` skill), and once the frontier is empty propose the matching `docs/GLOSSARY.md` / `docs/ADR.md` updates in one batch — applied only with the user's approval. During the session this skill still only talks.
 
-The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
+The interview is complete when material scope and design decisions are settled. Summarize
+the decisions and any reasonable assumptions; do not enumerate hypothetical branches. A
+discussion-only request ends here. If the user also authorized implementation, continue
+once applicable approval boundaries are satisfied; reuse decisions already confirmed.
 
 ## Do NOT use when
 

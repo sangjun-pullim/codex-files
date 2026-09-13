@@ -5,15 +5,17 @@ description: "Create or verify an implementation plan when requested, or when AG
 
 # Implementation Plan with Code-Verified Review Loop
 
-Write a concrete plan into `docs/impl-spec/`, then have a fresh-context `reviewer` verify every
-claim against the actual code. The plan's author has already read the code and glosses over what
+Create a concrete plan in `docs/impl-spec/`, or review an existing plan within the requested
+write scope, then have an independent `reviewer` verify its claims against the code.
+The plan's author has already read the code and glosses over what
 it "understands"; a reviewer that starts from scratch catches wrong line numbers, missed callers,
 and skipped patterns.
 
 ## Do NOT use when
 
 - A small change needs no written plan and the user did not request one — plan inline; AGENTS.md still controls required tests and reviews.
-- The problem itself is still vague — sharpen it with `grilling` first
+- The user wants an idea interview rather than a plan — use `grilling`. For a plan with
+  unresolved requirements, ask only the material decisions needed for that plan.
 - An approved spec already exists and it is time to build — `impl-execute`
 
 ## Phase 0: Requirements
@@ -26,11 +28,11 @@ and skipped patterns.
 
 ## Phase 1: Plan Creation
 
-**Verifying an existing plan** (the user points at a plan document — an active
-`docs/impl-spec/` file or any other): skip drafting and numbering — edit that file in place, add
-a `risk-surface` field if its frontmatter predates it (an old `tier` field can stay), and go to
-Phase 2. For editing a step already marked `[x]`, see the `second-brain` skill's impl-spec
-Lifecycle.
+**Verifying an existing plan**: skip drafting and numbering, and go to Phase 2. A review-only
+request leaves the file unchanged: report findings and proposed edits, including any needed
+`risk-surface` field. If plan edits are already requested or approved, update the active file
+in place; an old `tier` field can stay. For editing a step already marked `[x]`, follow the
+`second-brain` skill's impl-spec Lifecycle. Archived specs remain frozen.
 
 1. **Scope analysis** — spawn a `planner` agent with the requirements above. Resolve factual
    questions through inspection; bring only material scope/design decisions to the user.
@@ -45,18 +47,21 @@ Lifecycle.
 
 ## Phase 2: Review Loop
 
-1. Spawn a **new** `reviewer` agent (never reuse one — fresh context is the point) with the spec
+1. Reuse valid independent review evidence under AGENTS.md's review-reuse rule. When a new
+   review is needed, spawn a **new** `reviewer` agent with the spec
    path. It runs in Plan verification mode (`~/.codex/agents/reviewer.toml`). From round 2 on, also pass the
    previous round's disposition table.
-2. **Disposition** — for each finding: `ACCEPTED` (fix the spec) or `REJECTED` with concrete
+2. **Disposition** — for each finding: `ACCEPTED` (fix the spec when authorized, otherwise
+   propose the correction) or `REJECTED` with concrete
    evidence (file:line or reasoning). "Not needed" without evidence is not a rejection.
 
    | Finding | Severity | Disposition | Rationale |
    |---------|----------|-------------|-----------|
 
-3. Apply ACCEPTED findings to the spec body. Append REJECTED and out-of-scope findings to
-   `## Review Notes` with their rationale, so later reviewers and the implementer see what was
-   deliberately declined.
+3. For an authorized plan creation or edit, apply ACCEPTED findings to the spec body. Append
+   REJECTED and out-of-scope findings to `## Review Notes` with their rationale. For a
+   review-only request, put dispositions and proposed corrections in the report, leave the
+   spec unchanged, and proceed to Phase 3; proposed fixes do not clear open findings.
 4. **Exit** when a round reports no CRITICAL/HIGH findings. **Cap: 3 rounds.** If CRITICAL/HIGH
    findings remain at the cap, or the same finding keeps coming back, stop: append each open
    CRITICAL/HIGH to `## Review Notes` marked `UNRESOLVED` and tell the user the spec is not
@@ -64,8 +69,8 @@ Lifecycle.
 
 ## Phase 3: Present
 
-Present the spec path, the risk surface recorded in its frontmatter, what the review rounds
-found and fixed, and any remaining MEDIUM/LOW notes. For a planning-only request, stop after presenting the reviewed spec. If implementation
+Present the spec path, the risk surface, findings, applied or proposed corrections, and any
+remaining notes. For a review-only or planning-only request, finish after presenting the report. If implementation
 is already authorized and applicable approval gates are satisfied, continue with `impl-execute`.
 
 ## Output Format

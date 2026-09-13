@@ -2,7 +2,13 @@ Read the [skill entrypoint](../SKILL.md) for shared scope and constraints.
 
 ## Full Handoffs
 
-A full handoff transfers ownership to another agent or worktree, then the original agent stops. Treat requests phrased as "hand off", "handoff", "handover", "give this to another agent", "give this to another worktree", "another agent", or "another worktree" as full handoffs unless the user explicitly asks to supervise, monitor, wait for results, track completion, coordinate a DAG, use decision gates, or manage ask/reply.
+A full handoff transfers ownership to another agent or worktree, then the original agent
+stops. Use this mode only when the user's request clearly transfers responsibility for
+completion. Mentioning another agent, worktree, model, or reasoning effort alone is not a
+handoff. Preserve the current task's ownership and completion obligations for location or
+tool changes. If responsibility remains materially ambiguous, clarify it before dispatch;
+continue independent preparation. Use supervised dispatch when the user asks you to retain
+ownership or return the worker's results, following the applicable delegation rules.
 
 Do not use `orca orchestration task-create`, `orca orchestration dispatch --inject`, or `orca orchestration check --wait` for full handoffs. `task-create` is also forbidden because it records coordinator-owned tracking state; if a task row is needed, the user asked for supervised orchestration. Deliver the prompt with worktree/terminal commands, report the created worktree/terminal if useful, and stop monitoring. A worktree the AGENTS.md **워크트리 분리** rule routed to supervision is **Supervised Dispatch**, not a handoff.
 

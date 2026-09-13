@@ -31,7 +31,7 @@ ORCA worktree rm --worktree id:<repoId>::<worktreePath> --force --json
 ```
 
 `--force` removes a worktree with uncommitted changes. Use it only on a worktree you know is
-expendable — see `impl-execute` Phase 3 for the Codex cleanup path, which forbids it.
+expendable — see [delegated execution](../../impl-execute/references/delegated-execution.md) step 6 for the cleanup rule, which forbids it.
 
 Selectors:
 

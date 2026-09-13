@@ -25,7 +25,7 @@ Check for these indicators to determine which standard files are needed:
 | Controllers/routes exist AND the API has external consumers (internal-only: route code is the doc) | `API-SPEC.md` |
 | `package.json` has react/next dependencies | `FRONTEND-ARCHITECTURE.md` |
 | Always | `ARCHITECTURE.md`, `ADR.md`, `BUG-FIXES.md` |
-| PRD required-when is met (see the `second-brain` skill) | `PRD.md` (template only — see Step 4) |
+| Product documentation is within the requested scope (see the `second-brain` skill) | `PRD.md` (template only — see Step 4) |
 | Complex domain logic detected | `BUSINESS-LOGIC.md` |
 | The `second-brain` skill's `GLOSSARY.md` creation criterion is met | `GLOSSARY.md` |
 

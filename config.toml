@@ -1,6 +1,6 @@
 personality = "friendly"
 model = "gpt-6-astra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
 project_doc_fallback_filenames = []
 
 # Add behavioral guidance without replacing Codex's built-in instructions.
@@ -16,7 +16,8 @@ When close_agent is available, call it promptly after recording each subagent's 
 max_concurrent_threads_per_session = 20
 
 [tui]
-status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "git-branch"]
+status_line = ["model-with-reasoning", "context-remaining", "five-hour-limit", "weekly-limit", "git-branch", "permissions", "context-window-size"]
+status_line_use_colors = true
 
 [features]
 hooks = true

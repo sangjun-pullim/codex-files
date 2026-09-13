@@ -8,7 +8,7 @@ The **Layer** column decides stamping: derivable-layer docs carry a freshness st
 
 | File | Layer | Purpose | When Required |
 |------|-------|---------|---------------|
-| `PRD.md` | hand-written | Product requirements — what we're building, what we're not, and why (see PRD section below) | New projects; substantial features (see PRD section) |
+| `PRD.md` | hand-written | Product requirements — what we're building, what we're not, and why (see PRD section below) | Product documentation requested or approved |
 | `ARCHITECTURE.md` | derivable | High-level map — module boundaries, integration points, data flow (not an exhaustive structure listing) | Always |
 | `DB-SCHEMA.md` | derivable | Modeling rationale, constraints, migration notes (the schema itself lives in `schema.prisma`) | Prisma/DB projects |
 | `API-SPEC.md` | derivable | External API contract — the contract is the truth, not the code | APIs with external consumers (internal-only: route code is the doc) |
@@ -36,10 +36,14 @@ wherever the uppercase name is named; `/docs-sync` proposes migrating them.
 
 Rules:
 
-- **Required** for new projects, and for features touching 5+ production files — such a feature must appear in `## Scope` before its spec is written. A small change on a risk surface — one file touching auth, say — does not by itself require a PRD entry. Optional below that.
+- **When useful**: consult relevant PRD scope and non-goals when product intent is unclear.
+  Create or update it when product documentation is requested or included in the approved
+  scope. File count and PRD absence do not block planning; record settled intent in the spec
+  when no PRD exists. Material product decisions and AGENTS.md approval boundaries still apply.
 - **Size**: keep it under ~200 lines. Past that, the PRD is absorbing spec content — move the overflow into the active impl-spec's Context; if none exists or the relevant spec is archived, the overflow is product-level and belongs in `ARCHITECTURE.md` / `ADR.md` — never into an archived spec, never into a second PRD file.
 - Hand-written layer, no stamp. Update when product direction changes — a PRD states current intent, not history (history lives in git).
-- A vague request gets sharpened with the `grilling` skill first; the PRD is written from the settled frontier afterwards.
+- Ask only unresolved product decisions that materially affect the document. Use `grilling`
+  when the user requests an idea interview; write from the settled intent.
 - **Boundary vs impl-spec**: the PRD owns the product-level what/why and success criteria ("무엇이 되면 성공"); `docs/impl-spec/` owns the code-level how and verification commands ("어떤 테스트로 확인"). A spec references its PRD by section (`PRD.md §Scope/<surface>`) — never restates it.
 - Downstream docs (`ARCHITECTURE.md`, `ADR.md`, …) update as decisions land, consistent with the PRD.
 

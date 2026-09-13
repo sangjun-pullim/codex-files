@@ -3,7 +3,9 @@ Read the [skill entrypoint](../SKILL.md) for shared scope and constraints.
 ## Documentation Maintenance
 
 - After completing a task that changes architecture, DB schema, API, or business logic, **suggest** updating the relevant `docs/` file
-- Do NOT auto-update docs without user approval
+- A review-only request leaves docs unchanged. When documentation edits or synchronization
+  are already requested or approved, apply the in-scope changes without asking again.
+  Propose additional documentation work outside that scope; AGENTS.md review boundaries apply.
 - When suggesting, be specific: state which file and what section needs updating
 - Keep docs concise — bullet points and diagrams over prose
 - `BUG-FIXES.md` is append-only until promotion: when the same root-cause pattern appears 2+ times, promote it to a durable guard via `/docs-sync` Part 5 (that command owns the target list). Promoted entries are compressed to a one-line reference — promotion doubles as compaction.

@@ -5,9 +5,11 @@ description: "Develop test-first or add integration tests when the user requests
 
 # Test-Driven Development
 
-TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle — consult them before and during the loop, not after.
+TDD is the red → green loop. Consult the relevant guidance at the start and revisit a
+section only when a new decision needs it; do not reread the skill on every cycle.
 
-When exploring the codebase, read `docs/GLOSSARY.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect `docs/ADR.md` in the area you're touching.
+Consult relevant `docs/GLOSSARY.md` entries when domain terminology is unclear, and related
+`docs/ADR.md` decisions when they affect the change. Reuse context already established.
 
 ## What a good test is
 

@@ -17,14 +17,17 @@ Codex) carries the blind spot this loop exists to defeat.
 
 ## Inputs
 
-- Spec path (`docs/impl-spec/<NNN>-*.md`). If none given, list top-level specs with
-  `status: active` and ask which one.
+- Spec path (`docs/impl-spec/<NNN>-*.md`). Reuse the plan already selected in the
+  conversation. Otherwise inspect active top-level specs and use the unique relevant plan;
+  ask only when multiple plausible plans remain. Selection does not itself grant approval.
 - If `## Review Notes` has `UNRESOLVED` rows, stop: the plan review never came back clean.
   Clear them first (re-run `/impl-plan`, or dispose them by hand with evidence).
 - Record the base branch as `<base>` (`git rev-parse --abbrev-ref HEAD`).
 
-**Who implements**: you, unless the user explicitly asked to delegate to a Codex CLI worker — then
-follow the Codex path below instead of Phase 1. Never switch to Codex on your own.
+**Who implements**: follow AGENTS.md's Astra routing policy. For automatic model-based
+delegation, use [codex-delegation](../codex-delegation/SKILL.md); the Astra supervisor retains
+the phases and spec lifecycle below. An explicit `codex-worker` courier request uses
+[delegated execution](references/delegated-execution.md) instead of Phase 1.
 
 **Delegated worker**: if a parent assigned you bounded implementation steps, implement only
 those steps, leave the spec to the parent, and return facts; the parent owns markers, review,
@@ -58,7 +61,8 @@ session owns all phases below, including review and closing.
 1. Write the change as a patch: `git add -A -N && git diff > <scratch>/review-N.diff` (from
    `<base>` if the work was committed as it went). The patch gives the reviewer
    the exact additions and deletions alongside current file contents.
-2. Spawn a **new** `reviewer` agent each round with: the spec path, the change summary and
+2. Reuse valid independent review evidence under AGENTS.md's review-reuse rule. When new
+   review is needed, spawn a **new** `reviewer` for that round with: the spec path, the change summary and
    dependency map, the patch path, the absolute checkout path, and (round 2+) the previous
    disposition table. It runs in Implementation verification mode (`~/.codex/agents/reviewer.toml`).
 3. **Disposition** — `ACCEPTED` (fix the code) or `REJECTED` with concrete evidence:
@@ -83,40 +87,7 @@ session owns all phases below, including review and closing.
 2. **Report**: what was built, files changed, what the review rounds caught, remaining
    MEDIUM/LOW notes, verification results.
 
-## Codex path
+## Delegated execution
 
-Load the `codex-delegation` skill first — it owns the codex dispatch contract; the mode question itself is the AGENTS.md 워크트리 분리 rule. Steps 4 and 6 hold whatever the worker was; skip this load when the worker is not codex.
-
-1. **Split** the unchecked steps into workers with disjoint file sets. A step that changes an
-   exported signature, schema, barrel, or shared type runs alone; a signature change and its
-   callers stay in one worker; no clean split → sequential. Each `## Tests` entry goes to the
-   worker owning the step it pins.
-2. **Dispatch** one `codex-worker` per group with the spec's absolute path, the step numbers it
-   owns, the `## Tests` entries for those steps quoted verbatim, and `<base>`. Workers never write
-   the spec; you flip markers after gating. In-place mode: one worker at a time.
-3. **Gate each report mechanically** (no diff review here): `codex 호출 0회` or no session id →
-   failed, re-dispatch; any `검증 → exit` non-zero → send the failing output back as a rework
-   request to the same session; `스펙 외 변경 파일` non-empty → inspect those paths; orca mode →
-   `git -C <worktree> log <base>..HEAD` must be non-empty (commit a dirty worktree there
-   yourself — that is assembly, not implementation). The same group failing the same check twice
-   ends the run: report the raw worker report and log path and let the user decide.
-   All clear → mark that group's steps `[x]` in the base checkout.
-4. **Assemble the union** — Phase 2 reviews one combined change.
-   - In-place: the checkout already holds it; `git add -A -N && git diff` is the union.
-   - Orca worktree: `git switch -c <task>-integration <base>`, **commit the spec marker flips
-     there**, merge each worker branch. A merge conflict is a cross-worker collision — resolve
-     only if mechanical, otherwise send it back to the owning sessions. Run build/lint/test on
-     the integration branch before any review: stale imports and mismatched signatures fail only
-     here. The patch for Phase 2 is `git diff <base>...HEAD`; pass the integration branch name.
-   - Write the change summary and dependency map for the union yourself, attributing each step
-     to its worker.
-5. **Phase 2 fixes** go back to the owning Codex session as rework (re-spawn the worker against
-   the same worktree/checkout with the session id and the correction verbatim), then re-gate and
-   re-assemble. A one-line mechanical fix may be done by you — say so, and in orca mode commit it
-   on the integration branch.
-6. **Phase 3 in orca worktree mode**, whatever the worker was: do not close the spec — the code sits on an unmerged integration
-   branch. Return the repo-root checkout to `<base>`, then report: worker → steps → Codex
-   worker id (codex: session id), the integration and worker branches, that nothing was merged into `<base>`, and
-   the cleanup the user runs after merging: `orca worktree rm --worktree path:<worktree>` per
-   worker, then `git branch -D` on each worker branch and `<task>-integration`. Never remove a
-   worktree holding uncommitted changes. Close the spec after the user merges.
+Read [delegated execution](references/delegated-execution.md) for the explicit courier workflow
+or isolated worker-branch assembly. Automatic shared-checkout execution uses the phases above.
