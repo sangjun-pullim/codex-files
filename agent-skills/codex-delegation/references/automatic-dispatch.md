@@ -1,15 +1,17 @@
 # Automatic dispatch supervised by Astra
 
-Use this workflow after Astra has classified an implementation or code-investigation task
-under AGENTS.md. The model table there is the source of truth. Astra may implement work it
-classifies as complex; ordinary implementation and code investigation go to Sol, with
-Terra and Luna reserved for the narrower cases in that table. Workers do not become supervisors.
+Use this workflow after Astra selects delegation under AGENTS.md's subscription-usage policy.
+AGENTS.md owns the decision criteria and model table. Workers do not become supervisors.
 
 ## Assignment and execution location
 
 - Astra identifies the bounded outcome, exact checkout, owned files, acceptance criteria,
   selected model and reasoning effort. A worker prompt must say that others may be working
   in the repository: preserve their edits and do not modify files outside its assignment.
+- Group related work that needs the same context into one assignment. Pass relevant paths,
+  decisions, and existing verification evidence instead of the full conversation. Keep the
+  report focused on findings or changes, evidence, and unresolved issues; continue related
+  rework in the same worker session as described below.
 - For an approved spec, pass its absolute path and assigned steps unchanged. The supervisor
   owns spec markers, assembly, review, and closing. A small task needs no new spec unless
   an existing approval boundary requires one.

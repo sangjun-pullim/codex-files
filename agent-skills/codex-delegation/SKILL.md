@@ -1,12 +1,13 @@
 ---
 name: "codex-delegation"
-description: "Dispatch coding or code-investigation workers under AGENTS.md's Astra model routing, or an explicit Codex courier request."
+description: "Dispatch implementation or code-investigation workers after Astra selects delegation under AGENTS.md's subscription-usage policy, or for an explicit Codex courier request."
 ---
 
 # Codex delegation
 
-Astra classifies the task, chooses the model and scope, supervises execution, and reviews
-the result. Use AGENTS.md's model table; this skill does not independently choose models.
+Astra first decides whether to delegate under AGENTS.md's subscription-usage policy. Load this
+workflow after that decision, not for every coding task. Astra chooses the model and scope,
+supervises execution, and reviews the result. Use AGENTS.md's model table for selected workers.
 
 Choose the relevant workflow only:
 
