@@ -1,11 +1,11 @@
-# Automatic dispatch supervised by Astra
+# Automatic dispatch
 
-Use this workflow after Astra selects delegation under AGENTS.md's subscription-usage policy.
+Use this workflow after the supervisor selects delegation under AGENTS.md's subscription-usage policy.
 AGENTS.md owns the decision criteria and model table. Workers do not become supervisors.
 
 ## Assignment and execution location
 
-- Astra identifies the bounded outcome, exact checkout, owned files, acceptance criteria,
+- The supervisor identifies the bounded outcome, exact checkout, owned files, acceptance criteria,
   selected model and reasoning effort. A worker prompt must say that others may be working
   in the repository: preserve their edits and do not modify files outside its assignment.
 - Group related work that needs the same context into one assignment. Pass relevant paths,
@@ -36,23 +36,23 @@ render its interactive interface; do not pipe them through `tee` or redirect std
 
 The worker prompt includes the task and these role constraints:
 
-> You are the worker assigned by the Astra supervisor. Implement or investigate only the
+> You are the worker assigned by the supervisor. Implement or investigate only the
 > assigned scope. Do not classify the overall task, spawn agents, select another model,
 > or approve your own result. Return changed files or findings, supporting evidence,
 > checks with exit codes, and unresolved issues. Preserve other contributors' changes.
 
 Launch interactive `codex`, without the `exec` subcommand or `--json`. Use an explicit model
-and effort so it does not inherit Astra's user default.
+and effort so it does not inherit the supervisor's user default.
 Disable further subagents for this child invocation using `-c agents.enabled=false`.
 Code investigation uses `-s read-only`; implementation may use `-s workspace-write` only
 within the supervisor's granted write scope. Match a more restrictive parent sandbox and
 applicable managed restrictions; never use danger flags, ignore user rules, bypass hooks,
 or copy credentials. Pass the parent's approval mode explicitly instead of relying on an
 unrelated CLI default. If a trust or approval prompt blocks work, report that concrete
-boundary to Astra; do not broaden permissions or approve it merely to make the worker finish.
+boundary to the supervisor; do not broaden permissions or approve it merely to make the worker finish.
 
 Example `run.py` beside `prompt.md`, after replacing the checkout, model, effort, and
-permission values with Astra's selection:
+permission values with the supervisor's selection:
 
 ```python
 from pathlib import Path
@@ -60,7 +60,7 @@ import os
 
 prompt = Path(__file__).with_name("prompt.md").read_text()
 args = [
-    "codex", "-m", "gpt-5.6-sol", "-c", 'model_reasoning_effort="high"',
+    "codex", "-m", "gpt-6.1-sol", "-c", 'model_reasoning_effort="high"',
     "-c", "agents.enabled=false", "-a", "on-request", "-s", "workspace-write",
     "-C", "<checkout>", prompt,
 ]
@@ -99,9 +99,9 @@ or branches as pane cleanup.
 
 ## Review and correction
 
-Astra inspects the worker's findings or actual diff and relevant callers, checks acceptance
+The supervisor inspects the worker's findings or actual diff and relevant callers, checks acceptance
 criteria, and decides whether the result is correct. Worker self-checks are evidence, not
-the final review. Use a fresh Astra `reviewer` whenever AGENTS.md or an approved spec requires
+the final review. Use a fresh independent `reviewer` with AGENTS.md's review model and effort whenever AGENTS.md or an approved spec requires
 independent review. Reuse still-valid review and test evidence as AGENTS.md permits.
 
 Preserve the worker's checkout and session for a correction of the same task. Read the pane
@@ -116,7 +116,7 @@ If the pane has closed, open interactive `codex resume <exact-session-id> <liter
 in the chosen checkout's split. Explicitly pass the selected model, effort, `-C`, `-s`, `-a`,
 and `-c agents.enabled=false` again. Do not use `exec resume` or `--last`. If the session ID
 cannot be established, report that limitation instead of resuming another session.
-Astra decides whether to keep the model, promote the task, or handle it as complex work.
+The supervisor decides whether to keep the model, promote the task, or handle it as complex work.
 After the same failure repeats, inspect the cause before another attempt; do not loop
 through models without new evidence. Continue other independent work while a real decision
 or approval is pending.
@@ -132,7 +132,7 @@ delegated.
 Distinguish sandbox-denied runtime access from a stopped Orca instance; use the applicable
 tool approval flow for a denied status/list command before declaring Orca unavailable.
 If there is no usable Orca runtime, report the display limitation and use a native worker
-with explicit `model` and `reasoning_effort` from Astra's selection and `fork_turns="none"`,
+with explicit `model` and `reasoning_effort` from the supervisor's selection and `fork_turns="none"`,
 if it preserves the requested location and isolation. A custom role must not override those
 values; use a compatible role or the default role. Include the same role constraints. Never silently discard an explicit
 requirement for a visible Orca worker or a specific isolated checkout; continue independent

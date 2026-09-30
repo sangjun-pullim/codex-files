@@ -24,9 +24,9 @@ Codex) carries the blind spot this loop exists to defeat.
   Clear them first (re-run `/impl-plan`, or dispose them by hand with evidence).
 - Record the base branch as `<base>` (`git rev-parse --abbrev-ref HEAD`).
 
-**Who implements**: Astra first applies AGENTS.md's subscription-usage decision. Implement directly
+**Who implements**: The supervisor first applies AGENTS.md's subscription-usage decision. Implement directly
 when delegation is not selected; otherwise use [codex-delegation](../codex-delegation/SKILL.md).
-The Astra supervisor retains the phases and spec lifecycle below in either case.
+The supervisor retains the phases and spec lifecycle below in either case.
 An explicit `codex-worker` courier request uses
 [delegated execution](references/delegated-execution.md) instead of Phase 1.
 

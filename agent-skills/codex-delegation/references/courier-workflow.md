@@ -2,7 +2,7 @@
 
 ## Do NOT use when
 
-- The user did not explicitly request the `codex-worker` courier workflow. Automatic Astra routing uses [automatic dispatch](automatic-dispatch.md) instead; a large plan alone does not select this courier workflow.
+- The user did not explicitly request the `codex-worker` courier workflow. Automatic supervisor routing uses [automatic dispatch](automatic-dispatch.md) instead; a large plan alone does not select this courier workflow.
 - Planning or reviewing — `codex-worker` is implementation-only. A one-off fix needs no spec
   file; a multi-step change does (`impl-plan` first).
 
@@ -25,17 +25,17 @@
   or isolation requirement silently.
 - Worker branches are NOT merged by the worker, and never onto the base branch — that stays the user's call. Union assembly: [delegated execution](../../impl-execute/references/delegated-execution.md).
 - Worktrees and their cards are cleaned up only after that call. A card that no longer represents live or pending work is noise in the dashboard that exists to show what *is* running. Procedure: [delegated execution](../../impl-execute/references/delegated-execution.md).
-- Astra remains the supervisor and reviewer. Pass its selected implementation model and reasoning effort to the courier; the actual Codex CLI process must use those values explicitly. The courier only transports that assignment.
+- The supervisor retains overall judgment and review responsibility. Pass its selected implementation model and reasoning effort to the courier; the actual Codex CLI process must use those values explicitly. The courier only transports that assignment.
 
 ## Delegation practice — you judge, codex implements
 
 `codex-worker` is a courier: it launches codex and reports facts — it never rewrites the spec, rules on correctness, or re-prompts codex on its own. Every judgment call is yours. The full dispatch procedure (split, gate, union assembly, review loop, rework) lives in the [delegated execution](../../impl-execute/references/delegated-execution.md); the contract below holds for ANY codex dispatch, ad-hoc included:
 
 - **Name codex as the implementer in the spawn prompt** — "codex로 구현하라" / "codex를 실행해 …", never "편집하라" / "수정하라" (measured: the latter made a worker skip codex and edit files itself; the verb decides the outcome).
-- **Give the actual CLI child its worker role** — Astra includes in the unchanged prompt:
-  "You are a bounded implementation worker supervised by Astra. Do not classify the overall
+- **Give the actual CLI child its worker role** — The supervisor includes in the unchanged prompt:
+  "You are a bounded implementation worker supervised by the supervisor. Do not classify the overall
   task, choose another model, launch other agents or Codex processes, or perform final
-  approval. Implement the assigned scope and return evidence to Astra. Preserve others' edits."
+  approval. Implement the assigned scope and return evidence to the supervisor. Preserve others' edits."
   `agents.enabled=false` disables native subagents; this role also excludes CLI re-delegation.
 - **Hand over the spec by file path, not paraphrase** — the worker feeds it to codex unchanged; re-summarizing invites drift.
 - **Gate each report mechanically before trusting the diff** — the checks, and the bound on re-dispatch, are the [delegated execution](../../impl-execute/references/delegated-execution.md) gate. At that gate open the full diff only on failure or out-of-scope files; the *union* diff is read unconditionally later, at assembly, and a reviewer agent judges it regardless (see the **Review once over the union** bullet).

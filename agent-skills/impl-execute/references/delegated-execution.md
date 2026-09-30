@@ -1,7 +1,7 @@
 # Delegated execution
 
 For an explicit `codex-worker` courier request, read [codex-delegation](../../codex-delegation/SKILL.md)
-and use steps 1–6. For automatic Astra routing and other supervised workers, use their dispatch workflow and the union
+and use steps 1–6. For automatic supervisor routing and other supervised workers, use their dispatch workflow and the union
 assembly and completion rules in steps 4 and 6. Phase references below point to
 [impl-execute](../SKILL.md). AGENTS.md owns the worktree/in-place choice and review reuse.
 
