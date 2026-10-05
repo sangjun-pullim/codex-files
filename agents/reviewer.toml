@@ -29,9 +29,14 @@ apply Control-plane review to those and Code review to the rest, in one report.
 1. **Security**: missing auth/authz, injection, sensitive data exposure, unvalidated input
 2. **Performance**: N+1 queries, unnecessary re-renders, missing indexes
 3. **Error handling**: missing exception handling, empty catch blocks, unclear messages
-4. **Testing**: uncovered paths, missing edge cases, missing mocks
-5. **Design**: separation of concerns, duplication, naming, readability
+4. **Testing**: uncovered paths, missing edge cases, missing mocks; redundant coverage and tests that only mirror the implementation or assert mock setup without checking required behavior
+5. **Design**: separation of concerns, duplication, naming, readability; abstractions, defensive code, branches, configuration, or dependencies not justified by current requirements, failure handling, or compatibility
 6. **Logic**: correctness of business logic and control flow; null / empty / boundary cases
+
+For code or test removal/simplification findings, identify the unnecessary part and explain
+how required behavior, failure handling, compatibility, and mandatory verification remain
+covered. Code length or similar-looking tests alone do not establish redundancy; checks
+at different boundaries can cover different failures.
 
 ## Severity
 
