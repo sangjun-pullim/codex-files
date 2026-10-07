@@ -8,6 +8,11 @@ Read the [skill entrypoint](../SKILL.md) for shared scope and constraints.
   Propose additional documentation work outside that scope; AGENTS.md review boundaries apply.
 - When suggesting, be specific: state which file and what section needs updating
 - Keep docs concise — bullet points and diagrams over prose
+- Current-state docs describe what applies now. Within authorized edits, replace changed
+  claims in place and remove the obsolete text; do not append dated corrections beside it.
+  Git preserves the history. Keep historical records (ADR entries, bug records, archived
+  specs, and explicitly historical documents) as history; active specs follow
+  [impl-spec Lifecycle](impl-spec-lifecycle.md). A changed fact alone does not authorize edits.
 - `BUG-FIXES.md` is append-only until promotion: when the same root-cause pattern appears 2+ times, promote it to a durable guard via `/docs-sync` Part 5 (that command owns the target list). Promoted entries are compressed to a one-line reference — promotion doubles as compaction.
 
 

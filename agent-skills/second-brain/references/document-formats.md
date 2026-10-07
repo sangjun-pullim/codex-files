@@ -63,7 +63,10 @@ definitions do.
 - A definition that outgrows one line (behavior rules, state transitions) belongs in
   `BUSINESS-LOGIC.md`; the glossary row keeps only a link. Never let the two files
   describe the same rule independently.
-- Hand-written layer: no freshness stamp, effectively append-only.
+- Hand-written layer: no freshness stamp. Maintain current terms and definitions in place
+  under the [documentation maintenance rules](maintenance.md). Keep a superseded name only
+  when it helps readers recognize legacy usage, explicitly marked as a former name or banned
+  alias; do not leave competing definitions as if both were current.
 - Creation criterion: a term has confused the model or a teammate at least once.
   Projects with obvious vocabulary skip this file.
 
