@@ -55,6 +55,18 @@ Orca는 별도 `CODEX_HOME`을 사용합니다. 현재 계정의 `AGENTS.md`, `r
 python3 -m unittest discover -s skills/migrate-to-codex/tests
 ```
 
+## 계획과 리뷰 지침
+
+리뷰의 반복 지적에 따른 정지·재개 기준은 항상 로드되는
+[AGENTS.md의 Scope and completion](AGENTS.md#scope-and-completion)에서 관리합니다.
+계획·구현 스킬은 이 기준을 참조하며, 세부 조사와 검증 절차는 다음 파일에 둡니다.
+
+| 파일 | 담당 내용 |
+|------|-----------|
+| [planner](agents/planner.toml) | 코드 의존성과 현재 문서의 규칙 사본을 조사하고, 사본 수·위치·소유·조사 범위와 미확인 영역을 보고합니다. 과거 기록은 사본 수에서 제외합니다. |
+| [impl-plan](agent-skills/impl-plan/SKILL.md) | 조사 결과를 계획의 영향 목록에 담고, 필요한 경우 문서가 규칙을 다시 서술하는 `restates` 관계를 표시합니다. |
+| [impl-execute](agent-skills/impl-execute/SKILL.md) | 미해결 계획 지적의 구현 진입을 차단합니다. 사용자 재개 요청이 있으면 미해결 구현 지적을 유지한 채 승인된 구현을 보정하고, 독립 리뷰가 해소를 확인한 뒤 기록을 제거합니다. |
+
 ## 버전 관리 범위
 
 - Codex 기본 설정과 전역 지침

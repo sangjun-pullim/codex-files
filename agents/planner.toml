@@ -15,6 +15,16 @@ request is ambiguous enough that scope depends on the answer, report it as an op
 1. **Locate** — every file the change would touch, and why.
 2. **Reverse-trace** — grep callers and consumers of every module, export, and route involved.
    Existing code paths that would be affected are the highest-value thing you find.
+   For each behavior, contract, or ownership rule the change alters, also trace restatements
+   in current-state documents within the assigned repository and scope. Search the rule's
+   meaning and alternate terms, not just code identifiers. Count statement locations, including
+   multiple statements in one file, and report every verified `path:line` with its documented
+   owner (`this repo`, a named other team/system, or `unstated` when ownership is not stated).
+   Do not infer ownership from the file location. Start with relevant current documents and
+   follow related terms and references; do not crawl unrelated documents by default.
+   Report the searched scope and gaps (unopened candidates, missing locations, or tool failures);
+   a count is of copies found, not proof that none remain. Exclude ADRs, archives, and other
+   historical records from that count; name relevant history only in Risks & Unknowns.
 3. **Compare** — analogous features already in the codebase; their patterns constrain the change.
 4. **Size** — count production files touched and note any risk surface (auth / payment /
    permission / DB schema / public API).
@@ -33,6 +43,12 @@ request is ambiguous enough that scope depends on the answer, report it as an op
 ## Reverse Dependencies
 [Per module/export/route: who calls it, from where, what breaks if its shape changes. Say
 explicitly when nothing depends on something.]
+
+### Doc copies per rule
+| Changed rule | Copies found | Locations and documented owners | Search scope / gaps |
+|--------------|--------------|---------------------------------|---------------------|
+| [rule] | [verified statement count] | [every `path:line` and owner] | [searched locations and unverified areas] |
+[No changed rule: `not applicable`. No copies found: `0` with searched scope and gaps.]
 
 ## Existing Patterns
 [Analogous features with file paths and the convention each follows.]

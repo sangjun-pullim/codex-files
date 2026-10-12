@@ -36,9 +36,12 @@ in place; an old `tier` field can stay. For editing a step already marked `[x]`,
 
 1. **Scope analysis** — spawn a `planner` agent with the requirements above. Resolve factual
    questions through inspection; bring only material scope/design decisions to the user.
-2. **Draft the spec** in the Output Format below. The planner's reverse dependencies and existing
-   patterns go into `## Affected Dependents` and the steps — the implementer never sees the scope
-   analysis, so the spec is how they reach it.
+2. **Draft the spec** in the Output Format below. The planner's code dependencies and document
+   copies per changed rule go into `## Affected Dependents`, including owners and search gaps;
+   existing patterns constrain the steps. Use `## Change Map` when relationships help explain
+   the change, with `restates` edges for document copies. A found copy is a dependency to assess,
+   not automatic permission to change an external contract or declare another team's ownership.
+   The implementer never sees the scope report, so carry its relevant evidence into the spec.
 3. **Save** to `docs/impl-spec/<NNN>-<short-description>.md`. `NNN` = highest existing number
    across `docs/impl-spec/` and `docs/impl-spec/archive/` + 1, zero-padded to 3 digits; `001` if
    none. Create the directory if missing.
@@ -51,7 +54,9 @@ in place; an old `tier` field can stay. For editing a step already marked `[x]`,
    review is needed, spawn a **new** `reviewer` agent with the spec
    path. It runs in Plan verification mode (`~/.codex/agents/reviewer.toml`). From round 2 on, also pass the
    previous round's disposition table.
-2. **Disposition** — for each finding: `ACCEPTED` (fix the spec when authorized, otherwise
+2. Before patching findings, apply AGENTS.md's repeated-rule stop and review-resume rule.
+   For a read-only review, keep unresolved findings and proposed directions in the report.
+   **Disposition** — for each finding: `ACCEPTED` (fix the spec when authorized, otherwise
    propose the correction) or `REJECTED` with concrete
    evidence (file:line or reasoning). "Not needed" without evidence is not a rejection.
 
@@ -65,7 +70,8 @@ in place; an old `tier` field can stay. For editing a step already marked `[x]`,
 4. **Exit** when a round reports no CRITICAL/HIGH findings. **Cap: 3 rounds.** If CRITICAL/HIGH
    findings remain at the cap, or the same finding keeps coming back, stop: append each open
    CRITICAL/HIGH to `## Review Notes` marked `UNRESOLVED` and tell the user the spec is not
-   review-clean — `/impl-execute` must not run on it until those rows are cleared.
+   review-clean — implementation must not begin with unresolved plan-review findings. Resuming
+   corrections for implementation-review findings follows `/impl-execute`'s Inputs instead.
 
 ## Phase 3: Present
 
@@ -92,8 +98,16 @@ risk-surface: <none | auth | payment | permission | db-schema | public-api>
 1. `path/to/file.ts` — brief description of change
 
 ## Affected Dependents
-[Code that must keep working but is not being changed: callers of every signature this touches,
-consumers of every export it renames, routes behind a middleware it alters. One line each with a path.]
+[Code that must keep working: callers of every signature this touches, consumers of every export
+it renames, routes behind a middleware it alters. One line each with a path.
+For each changed rule, one line with the count of document copies found, every `path:line` and
+its documented owner (`this repo`, named other team/system, or `unstated`), and search scope/gaps.
+Include changed documents as well as unchanged consumers; do not treat the count as exhaustive.]
+
+## Change Map
+[Include when relationships help explain the change; omit otherwise. Show code dependency edges
+such as `calls` / `consumes` and document edges as `doc/path:line --restates--> rule or canonical
+source`. A `restates` edge identifies a statement that reasserts the rule, not a mere link to it.]
 
 ## Implementation Steps
 
@@ -116,7 +130,7 @@ Every step heading carries a progress marker: `[ ]` unstarted, `[x]` implemented
 - [Commands that prove the change works]
 
 ## Review Notes
-<!-- REJECTED / out-of-scope findings with rationale; UNRESOLVED rows block /impl-execute. -->
+<!-- REJECTED / out-of-scope findings with rationale; UNRESOLVED plan-review findings block implementation. Resuming implementation-review corrections follows /impl-execute. -->
 
 | Finding | Severity | Disposition | Rationale |
 |---------|----------|-------------|-----------|

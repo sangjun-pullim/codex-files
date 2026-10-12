@@ -20,8 +20,15 @@ Codex) carries the blind spot this loop exists to defeat.
 - Spec path (`docs/impl-spec/<NNN>-*.md`). Reuse the plan already selected in the
   conversation. Otherwise inspect active top-level specs and use the unique relevant plan;
   ask only when multiple plausible plans remain. Selection does not itself grant approval.
-- If `## Review Notes` has `UNRESOLVED` rows, stop: the plan review never came back clean.
-  Clear them first (re-run `/impl-plan`, or dispose them by hand with evidence).
+- If `## Review Notes` has `UNRESOLVED` rows, block ordinary execution. Resolve plan-review
+  findings through `/impl-plan`, or by hand with evidence only when AGENTS.md does not require
+  independent review confirmation.
+- When the user resumes corrections for implementation-review findings under AGENTS.md,
+  retain those rows and correct the approved implementation through Phase 1 steps 2–4, even
+  when all steps are already `[x]`. Then run Phase 2 in Implementation verification mode;
+  remove only rows the independent reviewer explicitly confirms are resolved. Unresolved
+  plan-review findings and remaining approval gates still block implementation. A user-resumed
+  redesign starts a new review run with the same cap; a patch alone does not reset the cap.
 - Record the base branch as `<base>` (`git rev-parse --abbrev-ref HEAD`).
 
 **Who implements**: The supervisor first applies AGENTS.md's subscription-usage decision. Implement directly
@@ -66,14 +73,18 @@ session owns all phases below, including review and closing.
    review is needed, spawn a **new** `reviewer` for that round with: the spec path, the change summary and
    dependency map, the patch path, the absolute checkout path, and (round 2+) the previous
    disposition table. It runs in Implementation verification mode (`~/.codex/agents/reviewer.toml`).
-3. **Disposition** — `ACCEPTED` (fix the code) or `REJECTED` with concrete evidence:
+   Include retained `UNRESOLVED` findings and ask for explicit confirmation of their resolution.
+3. Before patching findings, apply AGENTS.md's repeated-rule stop and review-resume rule.
+   Remove retained `UNRESOLVED` rows only after independent confirmation of their resolution.
+   **Disposition** — `ACCEPTED` (fix the code) or `REJECTED` with concrete evidence:
 
    | Finding | Severity | Disposition | Rationale |
    |---------|----------|-------------|-----------|
 
 4. Fix ACCEPTED findings, re-run verification (a non-zero exit is itself an open finding), and
    update the change summary and dependency map for every file the fixes touched.
-5. **Exit** when a round reports no CRITICAL/HIGH findings. **Cap: 3 rounds.** At the cap with
+5. **Exit** when a round reports no CRITICAL/HIGH findings and no retained `UNRESOLVED` rows
+   remain. **Cap: 3 rounds.** At the cap with
    CRITICAL/HIGH still open, or the same finding coming back after a fix: stop, append each open
    CRITICAL/HIGH to the spec's `## Review Notes` marked `UNRESOLVED`, present them to the user,
    and go to Phase 3 without closing.
