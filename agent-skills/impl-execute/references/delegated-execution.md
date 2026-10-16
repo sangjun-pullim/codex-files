@@ -35,7 +35,10 @@ assembly and completion rules in steps 4 and 6. Phase references below point to
 5. **Phase 2 fixes** go back to the owning Codex session as rework (re-spawn the worker against
    the same worktree/checkout with the session id and the correction verbatim), then re-gate and
    re-assemble. A one-line mechanical fix may be done by you — say so, and in orca mode commit it
-   on the integration branch.
+   on the integration branch. For behavior findings, include AGENTS.md **동작 지적의 재현**
+   in the correction: require the reproduction test and its pre-fix result, or concrete evidence
+   for a defect that cannot be reproduced by a test. The supervisor decides disposition from
+   that evidence. The same rule applies to fixes made directly by the supervisor.
 6. **Phase 3 in orca worktree mode**, whatever the worker was: do not close the spec — the code sits on an unmerged integration
    branch. Return the repo-root checkout to `<base>`, then report: worker → steps → Codex
    worker id (codex: session id), the integration and worker branches, that nothing was merged into `<base>`, and

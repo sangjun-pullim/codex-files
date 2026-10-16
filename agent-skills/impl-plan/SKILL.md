@@ -54,29 +54,26 @@ in place; an old `tier` field can stay. For editing a step already marked `[x]`,
    review is needed, spawn a **new** `reviewer` agent with the spec
    path. It runs in Plan verification mode (`~/.codex/agents/reviewer.toml`). From round 2 on, also pass the
    previous round's disposition table.
-2. Before patching findings, apply AGENTS.md's repeated-rule stop and review-resume rule.
-   For a read-only review, keep unresolved findings and proposed directions in the report.
-   **Disposition** — for each finding: `ACCEPTED` (fix the spec when authorized, otherwise
-   propose the correction) or `REJECTED` with concrete
-   evidence (file:line or reasoning). "Not needed" without evidence is not a rejection.
+2. **Disposition** — classify each CRITICAL/HIGH finding under AGENTS.md **리뷰 루프**.
+   Give concrete evidence for REJECTED findings (file:line or reasoning).
 
    | Finding | Severity | Disposition | Rationale |
    |---------|----------|-------------|-----------|
 
-3. For an authorized plan creation or edit, apply ACCEPTED findings to the spec body. Append
-   REJECTED and out-of-scope findings to `## Review Notes` with their rationale. For a
-   review-only request, put dispositions and proposed corrections in the report, leave the
-   spec unchanged, and proceed to Phase 3; proposed fixes do not clear open findings.
-4. **Exit** when a round reports no CRITICAL/HIGH findings. **Cap: 3 rounds.** If CRITICAL/HIGH
-   findings remain at the cap, or the same finding keeps coming back, stop: append each open
-   CRITICAL/HIGH to `## Review Notes` marked `UNRESOLVED` and tell the user the spec is not
-   review-clean — implementation must not begin with unresolved plan-review findings. Resuming
-   corrections for implementation-review findings follows `/impl-execute`'s Inputs instead.
+3. Apply AGENTS.md **리뷰 정지** before any correction. Unless stopped, apply ACCEPTED
+   findings to the spec when editing is authorized. Record REJECTED findings with rationale
+   in `## Review Notes`. In read-only reviews, leave the spec unchanged and present dispositions
+   and proposed corrections in Phase 3; proposed corrections do not resolve open findings.
+4. **Exit, stop, and resume** follow AGENTS.md **리뷰 종료·재개** and **리뷰 정지**.
+   Pass retained UNRESOLVED rows to the reviewer for explicit resolution confirmation;
+   remove only confirmed rows. On a stop, report that the spec is not review-clean.
+   Unresolved plan-review findings block implementation; implementation-review corrections
+   follow `/impl-execute`'s Inputs.
 
 ## Phase 3: Present
 
 Present the spec path, the risk surface, findings, applied or proposed corrections, and any
-remaining notes. For a review-only or planning-only request, finish after presenting the report. If implementation
+remaining MEDIUM/LOW notes and REJECTED findings with their rationale. For a review-only or planning-only request, finish after presenting the report. If implementation
 is already authorized and applicable approval gates are satisfied, continue with `impl-execute`.
 
 ## Output Format

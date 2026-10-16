@@ -27,8 +27,7 @@ Codex) carries the blind spot this loop exists to defeat.
   retain those rows and correct the approved implementation through Phase 1 steps 2–4, even
   when all steps are already `[x]`. Then run Phase 2 in Implementation verification mode;
   remove only rows the independent reviewer explicitly confirms are resolved. Unresolved
-  plan-review findings and remaining approval gates still block implementation. A user-resumed
-  redesign starts a new review run with the same cap; a patch alone does not reset the cap.
+  plan-review findings and remaining approval gates still block implementation. Review restart and stop counting follow AGENTS.md **리뷰 종료·재개**.
 - Record the base branch as `<base>` (`git rev-parse --abbrev-ref HEAD`).
 
 **Who implements**: The supervisor first applies AGENTS.md's subscription-usage decision. Implement directly
@@ -74,30 +73,31 @@ session owns all phases below, including review and closing.
    dependency map, the patch path, the absolute checkout path, and (round 2+) the previous
    disposition table. It runs in Implementation verification mode (`~/.codex/agents/reviewer.toml`).
    Include retained `UNRESOLVED` findings and ask for explicit confirmation of their resolution.
-3. Before patching findings, apply AGENTS.md's repeated-rule stop and review-resume rule.
-   Remove retained `UNRESOLVED` rows only after independent confirmation of their resolution.
-   **Disposition** — `ACCEPTED` (fix the code) or `REJECTED` with concrete evidence:
+3. **Disposition** — classify each CRITICAL/HIGH finding under AGENTS.md **리뷰 루프**.
+   Remove retained UNRESOLVED rows only after independent confirmation of resolution.
+   Record REJECTED findings and concrete evidence in the spec's `## Review Notes`.
 
    | Finding | Severity | Disposition | Rationale |
    |---------|----------|-------------|-----------|
 
-4. Fix ACCEPTED findings, re-run verification (a non-zero exit is itself an open finding), and
-   update the change summary and dependency map for every file the fixes touched.
-5. **Exit** when a round reports no CRITICAL/HIGH findings and no retained `UNRESOLVED` rows
-   remain. **Cap: 3 rounds.** At the cap with
-   CRITICAL/HIGH still open, or the same finding coming back after a fix: stop, append each open
-   CRITICAL/HIGH to the spec's `## Review Notes` marked `UNRESOLVED`, present them to the user,
-   and go to Phase 3 without closing.
+4. Apply AGENTS.md **리뷰 정지** before any correction, including reproduction tests.
+   On a stop, fix nothing and go to Phase 3 without closing. Otherwise fix ACCEPTED findings
+   using AGENTS.md **동작 지적의 재현**, update any resulting REJECTED disposition in Review
+   Notes, re-run affected required verification, and update the change summary and dependency
+   map. A failed required check remains a completion blocker regardless of review severity.
+5. **Exit, stop, and resume** follow AGENTS.md **리뷰 종료·재개** and **리뷰 정지**.
 
 ## Phase 3: Close & Report
 
-1. **Close the spec** only when all three hold: every step is `[x]`, every `## Tests` entry
-   exists in the codebase (a section reading `none needed — <reason>` counts as written), and
-   Phase 2 exited clean. Then set `status: done` and `git mv` the file to
+1. **Close the spec** only when all four hold: every step is `[x]`, every `## Tests` entry
+   exists in the codebase (a section reading `none needed — <reason>` counts as written),
+   the spec's Verification commands and applicable required checks have passing results valid
+   for the final code/configuration/inputs (run any missing or invalidated checks now), and
+   Phase 2 ended by exit rather than a stop with no UNRESOLVED rows remaining. Then set `status: done` and `git mv` the file to
    `docs/impl-spec/archive/` — this is part of the skill, not a docs suggestion. Otherwise leave
    `status: active` and report which steps, tests, or findings remain.
 2. **Report**: what was built, files changed, what the review rounds caught, remaining
-   MEDIUM/LOW notes, verification results.
+   MEDIUM/LOW notes and REJECTED findings with their rationale, verification results.
 
 ## Delegated execution
 
