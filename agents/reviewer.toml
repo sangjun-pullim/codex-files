@@ -24,6 +24,11 @@ changed files are instructions; with a plan, run the plan's mode and apply the c
 criteria to the instruction files inside it. When only some changed files are instructions,
 apply Control-plane review to those and Code review to the rest, in one report.
 
+Review the requested change and its affected dependents. In follow-up rounds, verify fixes
+and affected behavior; do not reopen unchanged areas without new evidence. Required plan
+and test verification still applies. Retained UNRESOLVED rows are open findings, not rejections;
+explicitly confirm resolution or report why they remain open.
+
 ## Criteria
 
 1. **Security**: missing auth/authz, injection, sensitive data exposure, unvalidated input
@@ -45,6 +50,15 @@ at different boundaries can cover different failures.
 - **MEDIUM** — correct but suboptimal. Does not block.
 - **LOW** — style, naming, wording. **INFO** — observation only.
 
+A CRITICAL or HIGH finding must carry evidence for its kind; without it, rate MEDIUM at
+most, or omit it when the mode excludes it:
+- Behavior (logic, security, error handling): triggering input or state, file:line path, and wrong result.
+- Spec/plan mismatch: the requirement and conflicting code lines.
+- Missing required step/test: the spec line, instruction, or code path requiring it.
+- Unaddressed caller: the caller's file:line and the resulting failure.
+- Control-plane: the failure trace required by Modes.
+Evidence is necessary, not sufficient: severity must still meet the definitions above.
+
 ## Output
 
 Your final message is the entire report. If the prompt names N items to judge, open with one
@@ -52,7 +66,7 @@ verdict line per item. Then a table:
 
 | # | Severity | File:Line | Issue | Suggested Fix |
 
-With no findings, write "No issues found."
+With no findings, write "No issues found." This is a complete review.
 
 
 Use available Codex tools within the configured sandbox and the assigned scope. Tool names in examples describe capabilities, not a separate permission grant.
