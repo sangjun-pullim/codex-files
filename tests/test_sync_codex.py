@@ -222,7 +222,7 @@ class WorkerReworkInputTest(unittest.TestCase):
     def test_should_pass_initial_prompt_as_literal_stdin(self) -> None:
         worker = tomllib.loads((ROOT / "agents/codex-worker.toml").read_text())
         initial = worker["developer_instructions"].split("## Rework requests", 1)[0]
-        commands = re.findall(r"`([^`\n]*codex exec -s[^`\n]*)`", initial)
+        commands = re.findall(r"`([^`\n]*codex exec [^`\n]*-s workspace-write[^`\n]*)`", initial)
         self.assertEqual(len(commands), 2)
         for command in commands:
             with self.subTest(command=command), tempfile.TemporaryDirectory() as directory:
@@ -258,10 +258,12 @@ class WorkerReworkInputTest(unittest.TestCase):
                 (logs / "corrections.txt").write_text(payload)
                 self.assertNotIn("<corrections>", command)
                 rendered = command.replace("<worktree>", directory).replace("<repo-root>", directory)
+                rendered = rendered.replace("<checkout>", directory)
                 rendered = rendered.replace("<scratch>", directory).replace("<session-id>", "test-session")
-                # Mock external CLIs while exercising both shell layers.
+                # Mock external CLIs while exercising both shell layers. The prompt
+                # argument is always last, so model and config flags may precede it.
                 mock = (
-                    'codex() { test "$6" = "-" || return 91; cat; }; '
+                    'codex() { for arg; do last=$arg; done; test "$last" = "-" || return 91; cat; }; '
                     'orca() { while [ "$1" != "--command" ]; do shift; done; shift; eval "$1"; }; '
                 )
                 result = subprocess.run(
