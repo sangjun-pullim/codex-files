@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Human-in-the-loop reproduction loop.
 # Copy this file, edit the steps below, and have the USER run it in their
-# own terminal — the agent's shell has no tty, so `read` prompts abort
-# there. In Claude Code the user runs it with the `!` prefix so the
-# captured KEY=VALUE block lands in the conversation for the agent:
+# own interactive terminal so `read` prompts can accept input. After the
+# script finishes, the user pastes the captured KEY=VALUE block into the
+# Codex conversation:
 #
-# Usage (typed by the user):
-#   ! bash hitl-loop.template.sh
+# Usage (typed by the user in their terminal):
+#   bash hitl-loop.template.sh
 #
 # Two helpers:
 #   step "<instruction>"          → show instruction, wait for Enter
@@ -14,7 +14,7 @@
 #
 # At the end, captured values are printed as KEY=VALUE for the agent to parse.
 #
-# `capture` prints its value back to the terminal, where the agent reads it — so
+# `capture` prints its value back to the terminal for sharing with Codex, so
 # capture observations, and leave signing in to the user as a `step`.
 
 set -euo pipefail
