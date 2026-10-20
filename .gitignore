@@ -24,9 +24,8 @@
 !rules/
 !rules/**
 
-!skills/
-!skills/migrate-to-codex/
-!skills/migrate-to-codex/**
+!tests/
+!tests/**
 
 **/__pycache__/
 *.py[cod]

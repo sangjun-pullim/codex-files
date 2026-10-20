@@ -1,4 +1,0 @@
-#!/bin/sh
-# Retired entrypoint: Codex configuration is independently maintained.
-echo 'Claude-to-Codex synchronization is disabled. Edit ~/.codex/AGENTS.md and ~/.codex/agent-skills directly.' >&2
-exit 1

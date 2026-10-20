@@ -64,9 +64,6 @@ trusted_hash = "sha256:58e37ee167126a982f3d7ae0c87cf7e7b47851626601bae0fd905c82a
 enabled = true
 trusted_hash = "sha256:91f0a89f6fe6442ae91d8353b83cba62f28a2a160cdd190f9e85f5cd5890036f"
 
-[projects."/Users/pullim/.claude"]
-trust_level = "trusted"
-
 [hooks.state."/Users/pullim/.codex/hooks.json:pre_tool_use:3:0"]
 enabled = true
 trusted_hash = "sha256:576788615cdcaf5f458bccffcc17d66a5e3480059c7842d678ea352bd509181a"
