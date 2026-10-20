@@ -4,19 +4,15 @@ import importlib.util
 import json
 import os
 import re
-import stat
 import subprocess
-import sys
 import tempfile
 import tomllib
 import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[1]
 SYNC_HOOKS_PATH = ROOT / "bin" / "sync-codex-hooks.py"
-SYNC_FROM_CLAUDE_PATH = ROOT / "bin" / "sync-from-claude"
-SKILL_POLICY_MERGER_PATH = ROOT / "bin" / "merge-skill-policy.py"
 AUTO_FORMAT_PATH = ROOT / "hooks" / "auto-format.sh"
 
 spec = importlib.util.spec_from_file_location("sync_codex_hooks", SYNC_HOOKS_PATH)
@@ -26,28 +22,7 @@ sync_codex_hooks = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sync_codex_hooks)
 
 
-class SyncFromClaudeTest(unittest.TestCase):
-    def test_should_refuse_legacy_sync_without_touching_configuration(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            claude = root / ".claude"
-            codex = root / ".codex"
-            claude.mkdir()
-            codex.mkdir()
-            (claude / "CLAUDE.md").write_text("Claude source\n")
-            (codex / "AGENTS.md").write_text("Independent Codex instructions\n")
-            environment = dict(os.environ, CLAUDE_CONFIG_DIR=str(claude),
-                               CODEX_CONFIG_DIR=str(codex), ORCA_CODEX_HOME="")
-            before = {str(p): p.read_bytes() for p in root.rglob("*") if p.is_file()}
-            for flags in ([], ["--skills"], ["--replace"], ["--skills", "--replace"]):
-                with self.subTest(flags=flags):
-                    result = subprocess.run([str(SYNC_FROM_CLAUDE_PATH), *flags],
-                                            env=environment, text=True, capture_output=True)
-                    self.assertNotEqual(result.returncode, 0)
-                    self.assertIn("disabled", result.stderr)
-                    after = {str(p): p.read_bytes() for p in root.rglob("*") if p.is_file()}
-                    self.assertEqual(after, before)
-
+class LocalGuardHookTest(unittest.TestCase):
     def test_should_preserve_local_guard_behavior(self) -> None:
         cases = {
             "block-env-commit.sh": [("git add .env", 2), ("git add .env.example", 0)],
@@ -60,167 +35,6 @@ class SyncFromClaudeTest(unittest.TestCase):
                         input=json.dumps({"tool_name": "Bash", "tool_input": {"command": command}}),
                         text=True, capture_output=True)
                     self.assertEqual(result.returncode, expected, result.stderr)
-
-
-class SkillPolicyMergerTest(unittest.TestCase):
-    def run_merger(
-        self,
-        policy_file: Path,
-        allowed_root: Path,
-        state: str,
-        *,
-        check: bool = False,
-    ) -> subprocess.CompletedProcess[str]:
-        command = [
-            sys.executable,
-            str(SKILL_POLICY_MERGER_PATH),
-            "--existing",
-            str(policy_file),
-            "--target",
-            str(policy_file),
-            "--state",
-            state,
-            "--allowed-root",
-            str(allowed_root),
-        ]
-        if check:
-            command.append("--check")
-        return subprocess.run(
-            command,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-
-    def read_source_state(self, source_skill: Path) -> str:
-        result = subprocess.run(
-            [
-                sys.executable,
-                str(SKILL_POLICY_MERGER_PATH),
-                "--source-skill",
-                str(source_skill),
-            ],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        return result.stdout.strip()
-
-    def test_preserves_unmanaged_false_across_source_transition(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            allowed_root = Path(temporary_directory) / "skills"
-            policy_file = allowed_root / "example" / "agents" / "openai.yaml"
-            policy_file.parent.mkdir(parents=True)
-            original = "policy:\n  allow_implicit_invocation: false\n"
-            policy_file.write_text(original)
-
-            denied = self.run_merger(policy_file, allowed_root, "deny")
-            allowed = self.run_merger(policy_file, allowed_root, "allow")
-
-            self.assertEqual(denied.returncode, 0, denied.stderr)
-            self.assertEqual(allowed.returncode, 0, allowed.stderr)
-            self.assertEqual(policy_file.read_text(), original)
-
-    def test_restores_unmanaged_true_across_source_transition(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            allowed_root = Path(temporary_directory) / "skills"
-            policy_file = allowed_root / "example" / "agents" / "openai.yaml"
-            policy_file.parent.mkdir(parents=True)
-            policy_file.write_text(
-                "interface:\n  display_name: Example\npolicy:\n"
-                "  allow_implicit_invocation: true\n"
-            )
-
-            denied = self.run_merger(policy_file, allowed_root, "deny")
-            denied_text = policy_file.read_text()
-            allowed = self.run_merger(policy_file, allowed_root, "allow")
-
-            self.assertEqual(denied.returncode, 0, denied.stderr)
-            self.assertIn("allow_implicit_invocation: false", denied_text)
-            self.assertIn("original=true", denied_text)
-            self.assertEqual(allowed.returncode, 0, allowed.stderr)
-            self.assertIn("allow_implicit_invocation: true", policy_file.read_text())
-            self.assertNotIn("managed by sync-from-claude", policy_file.read_text())
-
-    def test_rejects_skill_and_agents_symlink_escapes(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = Path(temporary_directory)
-            allowed_root = root / "skills"
-            external_root = root / "external"
-            allowed_root.mkdir()
-            external_root.mkdir()
-
-            skill_link = allowed_root / "skill-link"
-            skill_link.symlink_to(external_root, target_is_directory=True)
-            skill_policy = skill_link / "agents" / "openai.yaml"
-            skill_result = self.run_merger(
-                skill_policy, allowed_root, "deny", check=True
-            )
-
-            real_skill = allowed_root / "real-skill"
-            real_skill.mkdir()
-            agents_link = real_skill / "agents"
-            agents_link.symlink_to(external_root, target_is_directory=True)
-            agents_policy = agents_link / "openai.yaml"
-            agents_result = self.run_merger(
-                agents_policy, allowed_root, "deny", check=True
-            )
-
-            self.assertNotEqual(skill_result.returncode, 0)
-            self.assertIn("resolves outside", skill_result.stderr)
-            self.assertNotEqual(agents_result.returncode, 0)
-            self.assertIn("resolves outside", agents_result.stderr)
-            self.assertEqual(list(external_root.iterdir()), [])
-
-    def test_ignores_fixed_temporary_symlink_collision(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = Path(temporary_directory)
-            allowed_root = root / "skills"
-            policy_file = allowed_root / "example" / "agents" / "openai.yaml"
-            policy_file.parent.mkdir(parents=True)
-            policy_file.write_text("interface:\n  display_name: Example\n")
-            external_file = root / "external.yaml"
-            external_file.write_text("do not change\n")
-            old_temporary = policy_file.with_name(f"{policy_file.name}.sync-tmp")
-            old_temporary.symlink_to(external_file)
-
-            result = self.run_merger(policy_file, allowed_root, "deny")
-
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(external_file.read_text(), "do not change\n")
-            self.assertTrue(old_temporary.is_symlink())
-            self.assertIn("allow_implicit_invocation: false", policy_file.read_text())
-            self.assertEqual(
-                sorted(path.name for path in policy_file.parent.iterdir()),
-                ["openai.yaml", "openai.yaml.sync-tmp"],
-            )
-
-    def test_reads_only_boolean_frontmatter_policy(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = Path(temporary_directory)
-            commented_true = root / "commented-true.md"
-            commented_true.write_text(
-                "---\nname: example\ndescription: Example.\n"
-                "disable-model-invocation: true # explicit only\n---\n"
-                "disable-model-invocation: false\n"
-            )
-            body_decoy = root / "body-decoy.md"
-            body_decoy.write_text(
-                "---\nname: example\ndescription: Example.\n---\n"
-                "```yaml\ndisable-model-invocation: true\n```\n"
-            )
-            block_scalar_decoy = root / "block-scalar-decoy.md"
-            block_scalar_decoy.write_text(
-                "---\nname: example\ndescription: |\n"
-                "  disable-model-invocation: false\n"
-                "  ---\n"
-                "disable-model-invocation: true # explicit only\n---\n"
-            )
-
-            self.assertEqual(self.read_source_state(commented_true), "deny true")
-            self.assertEqual(self.read_source_state(body_decoy), "allow false")
-            self.assertEqual(self.read_source_state(block_scalar_decoy), "deny true")
 
 
 class SyncCodexHooksTest(unittest.TestCase):
