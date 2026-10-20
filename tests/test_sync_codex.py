@@ -284,13 +284,12 @@ class WorkerReworkInputTest(unittest.TestCase):
                 payload = "don't expand $(touch injected-dollar) or `touch injected-tick`\n한글\n"
                 (logs / "corrections.txt").write_text(payload)
                 self.assertNotIn("<corrections>", command)
-                rendered = command.replace("<worktree>", directory).replace("<repo-root>", directory)
-                rendered = rendered.replace("<checkout>", directory)
+                rendered = command.replace("<worktree>", directory).replace("<checkout>", directory)
                 rendered = rendered.replace("<scratch>", directory).replace("<session-id>", "test-session")
                 # Mock external CLIs while exercising both shell layers. The prompt
                 # argument is always last, so model and config flags may precede it.
                 mock = (
-                    'codex() { for arg; do last=$arg; done; test "$last" = "-" || return 91; cat; }; '
+                    'codex() { while [ "$#" -gt 1 ]; do shift; done; test "$1" = "-" || return 91; cat; }; '
                     'orca() { while [ "$1" != "--command" ]; do shift; done; shift; eval "$1"; }; '
                 )
                 result = subprocess.run(
