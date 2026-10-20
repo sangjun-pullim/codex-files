@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Adapt migrated Claude hooks and mirror them into Orca's active Codex home."""
+"""Normalize Codex hooks and mirror them into Orca's active Codex home."""
 
 from __future__ import annotations
 
@@ -39,25 +39,14 @@ def commands(group: HookGroup) -> list[str]:
 
 def adapt_user_hooks(data: dict[str, Any], hooks_dir: Path) -> None:
     event_groups = data.get("hooks", {})
-    env_command = f"/bin/sh {shlex.quote(str(hooks_dir / 'block-env-read.sh'))}"
     auto_format_command = (
         f"/bin/bash {shlex.quote(str(hooks_dir / 'auto-format.sh'))}"
     )
 
-    for group in event_groups.get("PreToolUse", []):
-        for handler in group.get("hooks", []):
-            command = handler.get("command", "")
-            if ".claude/hooks/block-env-read.sh" in command:
-                group["matcher"] = "Bash"
-                handler["command"] = env_command
-
     for group in event_groups.get("PostToolUse", []):
         for handler in group.get("hooks", []):
             command = handler.get("command", "")
-            if (
-                ".claude/hooks/auto-format.sh" in command
-                or ".codex/hooks/auto-format.sh" in command
-            ):
+            if ".codex/hooks/auto-format.sh" in command:
                 group["matcher"] = "Write|Edit"
                 handler["command"] = auto_format_command
 
@@ -89,12 +78,6 @@ def fingerprint(group: HookGroup) -> str:
 
 def is_known_user_derived(group: HookGroup) -> bool:
     derived_markers = (
-        "/.claude/hooks/block-env-read.sh",
-        "~/.claude/hooks/block-env-read.sh",
-        "/.claude/hooks/block-env-commit.sh",
-        "~/.claude/hooks/block-env-commit.sh",
-        "/.claude/hooks/auto-format.sh",
-        "~/.claude/hooks/auto-format.sh",
         "/.codex/hooks/block-env-read.sh",
         "~/.codex/hooks/block-env-read.sh",
         "/.codex/hooks/auto-format.sh",

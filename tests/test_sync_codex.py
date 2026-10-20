@@ -25,6 +25,13 @@ spec.loader.exec_module(sync_codex_hooks)
 class LocalGuardHookTest(unittest.TestCase):
     def test_should_preserve_local_guard_behavior(self) -> None:
         cases = {
+            "block-env-read.sh": [
+                ("cat .env", 2),
+                ("cat config/.env.production", 2),
+                ("cat .env.example .env.sample .env.template", 0),
+                ("cat .env.example.local", 2),
+                ("git status --short", 0),
+            ],
             "block-env-commit.sh": [("git add .env", 2), ("git add .env.example", 0)],
             "block-dangerous-git.sh": [("git reset --hard", 2), ("git status --short", 0)],
         }
@@ -38,7 +45,7 @@ class LocalGuardHookTest(unittest.TestCase):
 
 
 class SyncCodexHooksTest(unittest.TestCase):
-    def test_rewrites_claude_auto_format_for_codex(self) -> None:
+    def test_should_normalize_codex_auto_format(self) -> None:
         data = {
             "hooks": {
                 "PostToolUse": [
@@ -47,7 +54,7 @@ class SyncCodexHooksTest(unittest.TestCase):
                         "hooks": [
                             {
                                 "type": "command",
-                                "command": "bash ~/.claude/hooks/auto-format.sh",
+                                "command": "bash ~/.codex/hooks/auto-format.sh",
                             }
                         ],
                     }
@@ -64,6 +71,26 @@ class SyncCodexHooksTest(unittest.TestCase):
             str(AUTO_FORMAT_PATH),
             group["hooks"][0]["command"],
         )
+
+    def test_should_preserve_claude_paths_and_reject_stale_active_groups(self) -> None:
+        for event, name in (
+            ("PreToolUse", "block-env-read.sh"),
+            ("PreToolUse", "block-env-commit.sh"),
+            ("PostToolUse", "auto-format.sh"),
+        ):
+            for prefix in ("~", "/Users/example"):
+                with self.subTest(event=event, name=name, prefix=prefix):
+                    group = {"matcher": "*", "hooks": [{
+                        "type": "command",
+                        "command": f"bash {prefix}/.claude/hooks/{name}",
+                    }]}
+                    data = {"hooks": {event: [group]}}
+                    original = json.dumps(data, sort_keys=True)
+                    sync_codex_hooks.adapt_user_hooks(data, ROOT / "hooks")
+                    self.assertEqual(json.dumps(data, sort_keys=True), original)
+                    with self.assertRaisesRegex(SystemExit, "unknown active hook group"):
+                        sync_codex_hooks.merge_active_hooks(data, {"hooks": {}})
+                    self.assertEqual(json.dumps(data, sort_keys=True), original)
 
     def test_active_merge_uses_native_orca_hook_once(self) -> None:
         native_command = "/Users/pullim/.orca/agent-hooks/codex-hook.sh"
