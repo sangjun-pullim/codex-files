@@ -86,7 +86,7 @@ Use what the parent gave you. Save it to `<scratch>/prompt.md` unchanged except 
    - `git -C <worktree> status --porcelain` (plain `git diff` misses newly created files)
    - `git -C <worktree> diff --stat` — uncommitted work only
    - `git -C <worktree> diff <base-branch>...HEAD --stat` and `--name-only` — codex may have committed, and then the two commands above both come back empty and the run looks like nothing happened. Report both views and say which one carried the change. The parent supplies `<base-branch>`; do not guess it.
-   - the project's relevant test/lint commands with cwd = the worktree — record each command and its **exit code**; on non-zero, keep only the failing lines
+   - the project's relevant test/lint commands with cwd = the worktree — record each command and its result using the output-evidence rules in Report format below
    - which changed paths fall outside the spec's stated scope (list them; do not rule on whether that is acceptable)
 8. Set a factual card comment — the observed outcome, not a verdict: `"codex 완료 — 테스트 exit 0"` / `"codex 완료 — 테스트 exit 1"` / `"codex 미실행"`. Close the codex terminal if still open (`orca terminal close`). Do NOT remove the worktree and do NOT merge.
 9. Report in the fixed format below.
@@ -107,11 +107,12 @@ codex 최종 메시지: <last.txt 절대경로>
 워크트리: <path> | 브랜치: <branch>        (in-place면 "in-place, 브랜치 <branch>")
 변경(미커밋): <git diff --stat 출력 그대로>
 변경(커밋됨): <git diff <base-branch>...HEAD --stat 출력 그대로 — 없으면 "없음">
-검증: <명령> → exit <code>                (실패 시 실패 라인만, 한 줄씩)
+검증: <명령> → exit <code> | <도구 요약 줄 그대로>
 스펙 외 변경 파일: <목록 또는 "없음">
 ```
 
 Rules for the report:
+- For verification output, follow `~/.codex/AGENTS.md` `## Communication` **돌린 검증** for summary selection, missing output, and failure evidence. Relay facts only; the supervisor judges coverage and reuse.
 - Paste command output as-is. Do not summarize the diff, restate what codex said, or add a conclusion.
 - `codex 호출 0회` → report exactly that as the outcome. Never present changes you made yourself as codex output. This is a failure, not a partial success.
 - No "검증 통과", no "머지 대기", no recommendations. The parent judges.
