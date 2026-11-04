@@ -98,6 +98,7 @@ session owns all phases below, including review and closing.
    `status: active` and report which steps, tests, or findings remain.
 2. **Report**: what was built, files changed, what the review rounds caught, remaining
    MEDIUM/LOW notes and REJECTED findings with their rationale, verification results.
+   Apply `~/.codex/AGENTS.md` `## Communication` **변경 보고** to this user-facing report.
 
 ## Delegated execution
 
