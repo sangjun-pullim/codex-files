@@ -14,7 +14,7 @@ description: "Create a standalone HTML wireframe for an admin or operations scre
 
 ## 언제 쓰지 않나
 
-- 마케팅·랜딩 페이지, 발표 자료 → `design` / `artifact-design`
+- 마케팅·랜딩 페이지, 발표 자료 → 현재 제공되는 웹사이트·발표 자료 제작 도구나 스킬을 선택한다.
 - 실제로 동작하는 프로토타입, 디자인 시스템·컴포넌트 산출물
 - 화면이 아니라 코드 구조를 그리는 일 → `improve-codebase-architecture`
 

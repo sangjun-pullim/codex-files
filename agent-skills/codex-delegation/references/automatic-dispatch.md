@@ -44,12 +44,8 @@ The worker prompt includes the task and these role constraints:
 Launch interactive `codex`, without the `exec` subcommand or `--json`. Use an explicit model
 and effort so it does not inherit the supervisor's user default.
 Disable further subagents for this child invocation using `-c agents.enabled=false`.
-Code investigation uses `-s read-only`; implementation may use `-s workspace-write` only
-within the supervisor's granted write scope. Match a more restrictive parent sandbox and
-applicable managed restrictions; never use danger flags, ignore user rules, bypass hooks,
-or copy credentials. Pass the parent's approval mode explicitly instead of relying on an
-unrelated CLI default. If a trust or approval prompt blocks work, report that concrete
-boundary to the supervisor; do not broaden permissions or approve it merely to make the worker finish.
+Select and pass permissions using [worker permissions](worker-permissions.md), shared with
+the explicit courier workflow. Apply it to the initial launch and every resume.
 
 Example `run.py` beside `prompt.md`, after replacing the checkout, model, effort, and
 permission values with the supervisor's selection:

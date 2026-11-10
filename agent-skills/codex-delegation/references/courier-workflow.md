@@ -15,7 +15,8 @@
 - Before dispatch, classify reuse of the supervisor's own checkout as in-place, even if it
   is registered as a Git or Orca worktree. Courier Orca mode requires a separate worker
   checkout on a branch distinct from `<base>` so its commits can be gated and assembled.
-  Pass the supervisor checkout and `<base>` for that check. Resolve conflicting mode and
+  Pass the supervisor checkout and `<base>` (return branch) for that check, plus the fixed
+  `<base-commit>` for committed-change reporting. Resolve conflicting mode and
   location instructions at the supervisor; the courier must not silently switch either.
 - Apply AGENTS.md's **워크트리 분리** rule before dispatch. Reuse an already specified or
   approved location for the task and its rework; ask only when an unresolved location choice
@@ -26,6 +27,8 @@
 - Worker branches are NOT merged by the worker, and never onto the base branch — that stays the user's call. Union assembly: [delegated execution](../../impl-execute/references/delegated-execution.md).
 - Worktrees and their cards are cleaned up only after that call. A card that no longer represents live or pending work is noise in the dashboard that exists to show what *is* running. Procedure: [delegated execution](../../impl-execute/references/delegated-execution.md).
 - The supervisor retains overall judgment and review responsibility. Pass its selected implementation model and reasoning effort to the courier; the actual Codex CLI process must use those values explicitly. The courier only transports that assignment.
+- Before dispatch or rework, supply the permissions required by
+  [worker permissions](worker-permissions.md); the courier passes them explicitly to its CLI child.
 
 ## Delegation practice — you judge, codex implements
 

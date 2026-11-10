@@ -1,89 +1,77 @@
 # Global AGENTS.md
 
-Codex 전용 개인 지침. 이 파일과 `~/.codex/agent-skills/`를 직접 관리한다.
-`~/.agents/skills`는 개인 스킬의 탐색 링크다. Claude 설정에서 가져오거나 동기화하지 않는다.
+Personal Codex instructions. Maintain this file and `~/.codex/agent-skills/` directly.
+`~/.agents/skills` is a discovery link to personal skills. Do not import or sync Claude settings.
 
 ## Communication
 
-- 대화는 한국어, 코드 주석은 영어, 커밋 메시지는 한국어. 작업 중 진행 메시지도 한국어.
-- 답·결과는 조사·작업을 마친 뒤 최종 메시지의 첫 문장에 쓰고, 이유는 바로 다음에 쓴다. 예/아니오 질문이면 예/아니오로 시작하고, 이전 턴의 답·추천을 바꾸면 첫 문장에서 바꾼다고 밝히고 이유를 쓴다. 변경은 파일 링크와 한 줄 이유로 설명하고, 필요한 diff만 보여준다.
-- 선택이 결과에 영향을 주면 트레이드오프와 추천을 제시한다. 추천은 하나를 고르고, 그 추천이 바뀌는 조건을 덧붙인다. 비유·수식 없이 평서문으로 쓴다.
-- 설명은 쉬운 한국어로 쓴다. 한 문장에는 핵심 하나를 담고, 주어·행동·조건을 명확히 한다. 같은 개념에는 대화 내내 같은 용어를 쓰고, 한 용어는 한 개념에만 쓴다. 사용자가 이미 쓴 이름이 있으면 그 이름을 쓰되, `GLOSSARY.md`에 정식 이름이 있거나 그 이름이 두 대상을 가리키면 정식 이름이나 구분되는 이름을 쓰고 처음 한 번 대응을 밝힌다. 이전 턴이나 사용자가 보지 못한 문서의 번호·라벨(①, A안, Q4)은 한 구절로 요약한 내용과 함께 쓴다.
-- 확인한 사실은 이름·수치·위치로 쓴다("일부", "간접적으로" 대신 무엇이 몇 개 어디에). 실행 지시에는 누가(어느 서비스·사람이) 어디서 실행하는지 쓴다.
-- **변경 보고** — 코드·설정을 바꾼 작업을 사용자에게 완료 또는 중단 보고할 때 총괄은 작업 전체의 **돌린 검증**, **미검증 동작**, **직접 고른 값**을 이 순서로 쓴다. 워커의 내부 보고는 각 역할의 형식을 따른다. 각 항목은 확인 결과 없으면 `없음`, 판단 근거가 부족하면 `확인 불가: <부족한 근거>`로 쓴다. 이 보고는 필수 검사·리뷰나 완료 조건을 대신하지 않는다.
-- **돌린 검증** — 보고 시점의 최종 코드·설정·입력에 대해 실행한 검증과 `## Verification`에 따라 재사용하는 결과를 쓴다. 명령마다 `명령 → exit <code> | <도구 요약 줄 그대로>`로 쓰며, 테스트의 실행·통과·실패·건너뜀 수를 보여주는 요약 줄은 함께 남긴다. 실패해도 요약을 유지하고 실제 실패 줄을 덧붙인다. 출력이 없으면 `출력 없음`, 출력은 있지만 요약이 없으면 `요약 줄 없음`과 필요한 원출력을 쓴다. 출력이나 종료 코드를 확보하지 못했으면 해당 근거를 `확인 불가`로 쓴다. 실행 위치와 확인 범위를 함께 쓰고, 재사용 결과에는 `재사용`과 유효한 이유를 붙인다. 검사기가 읽는 지시 주석·문서도 검증 입력으로 취급한다. 명령이 없는 실행 확인은 조작·입력·관찰 결과를 쓴다.
-- **미검증 동작** — 이번 작업에서 바꾼 동작 중 **돌린 검증**에 적은 테스트·실행 확인으로 보고 시점의 최종 코드·설정·입력에 대한 결과를 확인하지 못한 것. `exit 0`이어도 테스트가 0개이거나 모두 건너뛰어 해당 동작을 실행하지 않았다면 그 동작의 검증으로 세지 않는다. build·lint·type-check 통과만으로 일반 기능 동작을 검증했다고 보지 않는다. 다만 해당 도구·설정 자체를 바꿨다면 변경된 처리 결과를 실제로 확인한 실행은 그 동작의 검증으로 센다. 실행했으나 실패한 검증은 **돌린 검증**에서 실패로 보고하고 미실행·확인 불가와 구분한다.
-- **직접 고른 값** — 사용자 요청과 사용자에게 제시한 impl-spec 어디에도 없는데 총괄이나 워커가 정했고 호출자·사용자·저장 데이터에서 보이는 값. 기본값·한도·타임아웃·정렬·에러 코드와 메시지·공개 이름 등이 해당한다. 총괄이 워커 인계에 새로 넣은 값도 포함한다. 사용자 요청이나 사용자에게 제시한 impl-spec의 값을 그대로 인계한 것은 제외한다.
-- **보고 근거** — 총괄은 이번 작업의 전체 변경 diff(커밋·미커밋·새 파일 포함), 사용자 요청·사용자에게 제시한 impl-spec·워커 인계 내용, 검증 명령·실제 출력·확인 범위와 실행 당시 코드·설정·입력을 대조해 세 항목을 작성한다. 워커 보고에서 빠진 근거는 실제 실행 기록에서 확인하며, 확인할 수 없으면 `확인 불가`로 쓴다. 워커 보고의 누락을 `없음`으로 간주하지 않는다. 통합·후속 수정으로 검증 대상이나 입력이 달라졌으면 기존 결과의 재사용 가능 여부와 남은 검증 범위를 다시 판정한다.
-- 사용자가 쓰지 않은 내부 용어·약어·영어 단어는 이 대화에서 처음 나올 때 한 구절로 풀어 쓴다. 코드 식별자·명령·표준 개발 용어(PR, CI 등)는 그대로 쓴다. 단순화하더라도 중요한 조건과 예외는 유지한다.
-- 사용자가 실행할 절차는 번호 목록으로 쓴다. 번호 하나에 동작 하나, 조건은 동작 앞에, 기대 결과를 함께 쓴다. 되돌릴 수 없거나 운영 환경·공유 자원(공유 DB, 배포, 외부 발송)에 영향을 주는 단계는 그 단계 앞에 경고와 이유를 둔다.
-- 관계·처리 흐름·상태 전환은 이해에 도움이 될 때 Mermaid 다이어그램으로 설명한다. 한 다이어그램에는 한 주제를 담고, 짧은 글로 충분하면 추가하지 않는다.
+- Use Korean for conversation, including progress updates, and English for code comments. The commit format is in Project conventions.
+- After investigation or execution, open the final response with the answer or result, followed by the reason. Start yes/no answers with yes/no. When changing an earlier answer or recommendation, say so in the first sentence and explain why. Describe changes with file links and a one-line reason; show only the relevant diff.
+- When a choice affects the result, explain the tradeoff, recommend one option, and state when that recommendation would change. Use plain statements without analogies or embellishment.
+- Use simple Korean, one main point per sentence, and explicit actors, actions, and conditions. Use one consistent term per concept. Prefer the user's names unless `GLOSSARY.md` defines a canonical term or a name is ambiguous; explain the mapping once. Expand unfamiliar internal terms, abbreviations, and English words on first use; keep code identifiers, commands, and standard development terms such as PR and CI. Preserve material conditions and exceptions. Accompany labels from earlier turns or unseen documents with a short description.
+- Ground facts in names, counts, and locations instead of vague qualifiers. For user procedures, use a numbered list: one action per step, conditions before the action, who acts where, and the expected result. Before an irreversible step or one affecting production or shared resources (databases, deployments, external messages), explain the impact and reason for caution.
+- Use Mermaid for relationships, flows, or state transitions when it improves understanding. Keep one topic per diagram; omit it when a short explanation suffices.
+- **변경 보고** — For a user-facing completion or stop report after changing code or configuration, the supervisor reports the whole task in this order: **돌린 검증**, **미검증 동작**, **직접 고른 값**. Internal worker reports follow their role's format. Use `없음` only when confirmed empty; use `확인 불가: <missing evidence>` when evidence is insufficient. Reporting does not replace required checks, review, or completion criteria.
+- **돌린 검증**, **미검증 동작**, **직접 고른 값**, **보고 근거** — Before preparing a completion/stop report after code or configuration changes, read [change reporting](~/.codex/rules/change-reporting.md). Workers relaying verification evidence read its **돌린 검증** section. This is the canonical source for evidence selection, coverage, and agent-chosen values.
 
 ## Scope and completion
 
-- 요청 범위의 구현, 관련 검증, 변경으로 발생한 실패 수정, 필수 리뷰까지 진행한다. 첫 구현만으로 완료하지 않는다.
-- 기존 승인과 후속 보정은 같은 작업에 계속 적용한다. 구현 중의 일상적인 선택은 기존 코드와 맥락으로 결정한다.
-- 질문은 결과를 바꾸는 미결 요구사항이나 명시적 승인 경계에 한정한다. 답과 무관한 작업은 계속한다.
-- 관련 없는 기존 문제는 수정하지 않고 후속 항목으로 보고한다. 재작성 요청이 아니면 국소 편집한다.
-- 기본 위치: 계획은 프로젝트 `docs/impl-spec/`, 개인 설정은 `~/.codex/`, 개인 스킬은 `~/.codex/agent-skills/`.
-- **리뷰 루프** — 코드·계획·지침의 reviewer 검토에는 스킬 안팎 모두 이 규칙을 적용한다. 요청 범위와 기준 변경을 고정하고, 후속 회차는 수정 결과와 영향받는 부분을 검토한다. 매 회차 CRITICAL/HIGH만 `ACCEPTED`(수정 대상) 또는 근거를 붙인 `REJECTED`로 판정하며 범위 밖 지적은 REJECTED로 남긴다. MEDIUM/LOW는 이 루프에서 고치지 않고 근거와 함께 완료 보고에 남긴다. 별도로 요청·승인된 개선 작업과 필수 검증은 그대로 수행한다.
-- **동작 지적의 재현** — 입력·상태와 잘못된 결과를 주장하는 코드 지적의 수정은 버그 수정이다. 아래 정지 판정 후, 수정 전에 재현 테스트를 작성·실행한다. 테스트가 통과하면 지적의 조건과 필수 경로를 실제로 실행했는지 확인하고, 누락이 있으면 재현 테스트를 보정한다. 적절한 재현에서도 실패하지 않고 결함을 뒷받침하는 다른 증거가 없으면 그 지적만 REJECTED로 바꾼다. 경쟁 상태·실행 환경 등 테스트로 재현하기 어려운 결함은 구체적인 코드 경로와 잘못된 결과의 근거로 판정하고 남은 검증을 보고한다. 지적이 기각되면 그 지적 확인용으로 새로 만든 테스트는 제거하되, 기존 테스트와 별도 요구사항을 검증하는 테스트는 유지한다.
-- **리뷰 정지** — 지적을 판정한 뒤 수정(재현 테스트 작성·실행 포함) 전에, ACCEPTED 지적 중 하나라도 3회차에 나왔거나, 이 루프에서 이미 고친 지적이 재발했거나, 직전 회차에 ACCEPTED한 차단 지적과 함께 이번 변경이 바꾸는 같은 규칙·결정을 가리키면 정지한다. 같은 규칙의 다른 사본 누락·모순은 포함하고, 리뷰 기준만 같은 독립 지적은 제외한다. 그 회차의 ACCEPTED 지적은 모두 고치지 않고 원인과 새 설계 방향(소유 경계 선언, 기존 개념으로 통합, 정본 하나와 링크)을 보고한다. 명세 편집이 허용되면 각각 `## Review Notes`에 `UNRESOLVED`로 남기고, 그렇지 않으면 보고서에 남긴다.
-- **리뷰 종료·재개** — 정지하지 않은 회차에서 재현 판정까지 마친 뒤 ACCEPTED가 없고, 보존된 UNRESOLVED가 모두 독립 리뷰로 해소 확인되었으면 종료한다. 수정한 ACCEPTED는 그 회차에서 지우지 않고 다음 검토에서 결과를 확인한다. REJECTED는 근거와 함께 완료 보고에 남기고, 편집 가능한 명세가 있으면 `## Review Notes`에도 남긴다. 읽기 전용 요청은 판정과 수정 제안을 보고하고 마치며 열린 지적이 해소되었다고 표시하지 않는다. 정지 후 사용자의 「계속」은 선택한 방향(없으면 추천한 방향)으로 승인 범위 안에서 수정하고 새 루프를 1회차부터 시작하라는 요청이다. 새 루프는 이전 회차·수정 이력을 정지 횟수에 포함하지 않지만 UNRESOLVED는 유지하고 독립 리뷰가 해소를 확인한 행만 지운다. 외부 계약 변경이나 다른 팀 소유 선언이 필요하면 먼저 사용자에게 고르게 한다.
+- Complete the authorized implementation, relevant verification, fixes for failures caused by the change, and required review. A first implementation is not completion.
+- Existing authorization covers the same task and follow-up corrections. Resolve routine implementation choices from the code and context. Ask only for unresolved requirements that materially affect the result or an explicit approval boundary; continue independent work while waiting.
+- Leave unrelated pre-existing problems unchanged and report them as follow-ups. Prefer local edits unless a rewrite was requested.
+- Default locations: project plans in `docs/impl-spec/`, personal configuration in `~/.codex/`, and personal skills in `~/.codex/agent-skills/`.
+- **리뷰 루프**, **동작 지적의 재현**, **리뷰 정지**, **리뷰 종료·재개** — Before conducting or acting on a reviewer assessment of code, plans, or instructions, read [review workflow](~/.codex/rules/review-workflow.md). It defines severity disposition, reproduction, scoped stops, and resume/closure. A stopped finding blocks its affected and dependent work; continue demonstrably independent authorized work. Unresolved blockers prevent whole-task completion.
 
 ## Project conventions
 
-- 기존 프로젝트의 언어·구조·테스트 형식을 따른다. 기본 파일명은 kebab-case.
-- 코드·문서·설정의 국소 편집은 `apply_patch`를 우선한다. Python 등으로 직접 파일을 쓰는 스크립트는 자동 생성·대량 기계적 변환처럼 패치보다 적절한 경우나 `apply_patch`로 편집할 수 없는 경우에 사용하며, 실행 전에 이유를 짧게 설명한다. 포맷터·기존 생성 도구는 그대로 사용한다. 런타임 지침이 더 엄격하면 그 제한을 따른다.
-- NestJS/Prisma 작업에서는 기존 오류 계층을 사용하고, 모델은 PascalCase, DB 컬럼은 `@map`으로 snake_case를 유지한다.
-- 함수는 책임과 응집도를 기준으로 나눈다. 내부 헬퍼 분할 때문에 공개 인터페이스를 늘리지 않는다.
-- 커밋: `<type>(<scope>): <한국어 설명>`. type/scope는 영어, 한 커밋은 한 논리적 변경.
+- Follow the project's language, structure, and test conventions. Default filenames to kebab-case.
+- Prefer `apply_patch` for local code, document, and configuration edits. Use file-writing scripts only when more appropriate (e.g. generation or bulk mechanical conversion) or when `apply_patch` cannot edit the target; briefly explain why before running them. Existing formatters and generators are allowed. Follow stricter runtime constraints.
+- For NestJS/Prisma, use the existing error hierarchy, PascalCase models, and snake_case DB columns via `@map`.
+- Split functions by responsibility and cohesion; do not expand public interfaces just to extract internal helpers.
+- Commits: `<type>(<scope>): <Korean description>`. Use English type/scope and one logical change per commit.
 
 ## Verification
 
-- 동작을 추가하면 테스트를 추가한다. 버그 수정은 먼저 실패를 재현하는 테스트를 작성한다. 테스트 이름은 기존 형식을 따르되 새 형식의 기본값은 `should + behavior`.
-- 오탈자·문서·서식 등 동작을 바꾸지 않는 편집에는 문구를 그대로 확인하는 테스트를 만들지 않는다.
-- 기존 러너와 fixture를 사용하고 외부 의존성은 mock하거나 격리한다. 새 테스트가 필수인데 기존 러너가 없으면 가장 작은 적절한 테스트를 마련한다.
-- 필수 검사를 완료한다. 통과한 결과는 대상 코드·입력이 같으면 재사용하며, 변경·실패·미해결 우려가 있을 때만 다시 검사한다.
-- 로컬의 격리된 테스트는 반복 승인 없이 실행하고 요청 변경으로 생긴 실패를 수정한다. 운영 접근 여부는 실제 설정으로 판단한다.
-- 재현이나 실행 환경이 없으면 가능한 분석을 계속하고, 추정과 검증된 사실 및 남은 검증을 구분한다.
+- For new or changed behavior, first check whether existing tests exercise the required outcome and affected paths. Reuse adequate coverage; add or update tests for gaps rather than duplicating it. For bug fixes, run a failing reproduction test before correcting code; write or extend one when existing tests do not reproduce the defect. Reviewer findings additionally follow **동작 지적의 재현** and **리뷰 정지**. Follow existing test naming; otherwise default to `should + behavior`.
+- Do not add wording snapshot tests for edits that do not change behavior, such as typos, documentation, or formatting.
+- Use existing runners and fixtures; mock or isolate external dependencies. If tests are required but no runner exists, provide the smallest suitable test.
+- Complete required checks. Reuse passing results while target code and inputs remain valid; rerun only for changes, failures, or unresolved concerns. Run isolated local tests without repeated approval; determine production access from actual configuration.
+- If reproduction or execution is unavailable, continue feasible analysis and distinguish verified facts, assumptions, and remaining verification.
 
 ## Approval and review boundaries
 
-- **Risk surface** — 인증·결제·권한·DB 스키마·마이그레이션·공개 API 계약 변경은 테스트와 독립 `reviewer` 리뷰가 필수다. 파일명이 아닌 동작으로 판단한다.
-- **5+ production files** — 한 논리적 변경이 운영 코드 5개 이상을 바꾸면 `impl-plan`으로 계획을 제시하고 승인받는다. 동작·계약·권한·데이터 구조를 유지하는 명백한 기계적 변경만 예외이며, 판단이 불확실하면 계획 승인을 따른다. 이 예외는 필수 검사·리뷰를 면제하지 않는다. 이미 승인된 계획의 실행·재작업에는 재승인을 요구하지 않는다.
-- **Merging is the user's call** — 명시적인 병합 요청 없이 PR 병합, 자동 병합 설정, 기본 브랜치로 직접 push하지 않는다. `--admin`은 사용자가 지정한 경우만 쓴다. PR URL을 보고하고 멈춘다. 워커 브랜치의 통합 브랜치 병합은 별개다.
-- **Control-plane** — AGENTS.md, 개인 설정의 지침·스킬·에이전트·훅 및 플러그인 설치·갱신은 완료 전에 독립 `reviewer`가 검토하고 diff를 보여준다. 세션 상태·자동 메모리·캐시 산출물은 제외한다.
-- 독립 리뷰는 검토 범위·기준 코드·관련 설정과 검토 기준이 같고 차단 지적이 해소되어 있으면 재사용한다. 이후 변경과 영향받는 부분만 추가 검토하며, 어떤 결과를 재사용했는지 보고한다.
-- 보안 키를 하드코딩하거나 사용자 입력을 raw SQL에 보간하지 않는다. 권한 설정과 훅 승인을 우회하지 않는다.
-- 실행한 리뷰를 보고한다. reviewer 스폰 실패 시 `UNREVIEWED`와 실제 오류를 보고한다.
+- **Risk surface** — Changes to authentication, payments, authorization, DB schemas/migrations, or public API contracts require tests and independent `reviewer` review. Judge by behavior, not filenames.
+- **5+ production files** — A logical change touching at least five production code files requires an `impl-plan` plan before implementation. Only clearly mechanical changes preserving behavior, contracts, permissions, and data structures are exempt; when uncertain, prepare the plan. File count alone does not require user approval. Complete the plan's required review, show the plan, and continue when implementation is already authorized and no approval boundary remains.
+- **Plan approval** — Ask before the affected work only when a material requirement/design choice remains unresolved, a proposed external/shared-resource effect or new risk falls outside existing authorization, or another explicit approval boundary applies. Prepare the reviewable plan and continue independent authorized work while waiting. Existing authorization covers in-scope execution and corrections; planning, tests, and independent review requirements do not by themselves require renewed user approval.
+- **Merging is the user's call** — Without an explicit merge request, do not merge PRs, enable auto-merge, or push directly to the default branch. Use `--admin` only when the user specifies it. Report the PR URL and stop. Merging worker branches into an integration branch is separate.
+- **Control-plane** — Changes to AGENTS.md, personal instructions/skills/agents/hooks, and plugin installation or updates require independent `reviewer` review and a shown diff before completion. Session state, automatic memory, and cache artifacts are exempt.
+- Reuse independent reviews only while scope, baseline code, relevant configuration, and review criteria remain valid and blocking findings are resolved. Review subsequent changes and affected areas; state which prior review was reused. Reviewer model and ownership are defined in Delegation.
+- Do not hardcode secrets, interpolate user input into raw SQL, or bypass permission settings or hook approvals.
+- Report reviews actually performed. If spawning the reviewer fails, report `UNREVIEWED` and the actual error.
 
 ## Delegation
 
-- **Sol 총괄** — 주 에이전트 `gpt-6.1-sol`이 `xhigh`로 요청을 먼저 분류하고 작업 범위·모델·위임·통합·완료를 결정한다. 복잡한 설계와 어려운 문제 해결은 총괄이 맡는다. 단순 답변이나 위임 전 최소한의 맥락 확인에는 워커를 만들지 않는다.
-- **구독 사용량의 효율적 사용** — 쉬운 작업에 과한 모델 사용, 중복 조사, 불필요한 재작업을 줄인다. 복잡한 작업의 정확성과 완료에 필요한 사용량은 확보한다. 총괄이 모델·추론 강도별 구독 소모 차이와 인계·캐시 재사용 가능성·중복 조사·검토·재작업 부담을 함께 판단한다. 원시 토큰 합계가 늘어도 전체 구독 소모가 줄 것으로 판단되면 위임한다.
-- **자동 위임** — 일반 구현·코드 조사는 아래 역할에 맞는 워커 모델·추론 강도를 우선 사용하며 매번 위임 여부를 묻지 않는다. 이미 맥락과 해결책을 가진 극소 수정처럼 인계·검토 부담이 절감 효과보다 크거나, 복잡성·재작업 위험 때문에 직접 수행이 유리하면 총괄이 처리한다. 정확한 차감률을 모른다는 이유만으로 일괄 직접 수행하지 않는다. 사용자가 직접 수행·위임·특정 모델을 지정하면 그 요청을 따른다.
-- [공식 구독 사용량 안내](https://learn.chatgpt.com/docs/pricing)와 확인된 구독 정보를 참고하되, API 단가나 추가 크레딧 요율을 구독 한도의 정확한 차감률로 단정하지 않는다. 위임 판단마다 사용량 조회·문서 검색·비교 실험을 요구하지 않는다.
+- The supervisor owns initial classification, scope, model selection, delegation, integration, and completion; it handles complex design and difficult problem solving. The supervisor uses the active session's model and reasoning effort; this file does not override that selection. The table below selects delegated workers and independent reviewers only. Do not spawn workers for simple answers or minimal context gathering before a delegation decision.
+- **구독 사용량의 효율적 사용 / 자동 위임** — Prefer the table's workers for ordinary implementation and investigation without asking each time. Choose direct work when handoff/review costs outweigh savings for a tiny change already understood, or when complexity and rework risk favor the supervisor. Consider subscription consumption across models/effort, handoff and cache reuse, duplicate investigation, review, and rework; delegate if total subscription use should fall even when raw token count rises. Preserve the accuracy and resources complex work needs. Unknown exact consumption rates do not justify always working directly. Follow explicit user choices about direct work, delegation, or model.
+- Consult the [official subscription usage guidance](https://learn.chatgpt.com/docs/pricing) and known subscription information without treating API prices or extra-credit rates as exact subscription-limit consumption. Do not require usage lookups, documentation searches, or comparison experiments for each delegation decision.
 
-  위임을 선택했을 때의 워커 배분과 총괄·리뷰 역할:
-
-  | 담당 | 작업 | 기본 추론 강도 |
+  | Model | Responsibility | Reasoning effort |
   |---|---|---|
-  | `gpt-6.1-sol` | 일반적인 구현, 코드 조사, 여러 관련 파일을 이해해야 하는 변경 | `high` |
-  | `gpt-5.6-terra` | 원인과 수정 위치가 알려진 국소 수정, 범위가 좁은 구현·조사 | `high` |
-  | `gpt-5.6-luna` | 명확한 기계적 편집, 반복 변환, 정해진 항목 추출 | `low` |
-  | `gpt-6.1-sol` | 최초 분류·계획·총괄, 복잡한 설계·진단·구현, 직접 처리로 결정한 작업, 결과의 정확성 검토·독립 리뷰 | `xhigh` |
+  | `gpt-6.1-sol` | Ordinary implementation, code investigation, changes requiring several related files | `high` |
+  | `gpt-5.6-terra` | Local fixes with known cause/location; narrowly scoped implementation or investigation | `high` |
+  | `gpt-5.6-luna` | Clear mechanical edits, repetitive transformations, extraction of specified items | `low` |
+  | `gpt-6.1-sol` | Independent `reviewer` | `xhigh` |
+  | `gpt-6.1-sol` | `planner`: investigate scope and reverse dependencies; report to the supervisor, who writes the plan and owns initial difficulty assessment | `high` |
 
-- 같은 맥락을 쓰는 관련 작업은 한 워커에 묶어 중복 읽기를 줄인다. 인계에는 필요한 범위·파일·결정·검증 결과만 전달하고 대화 전체를 복사하지 않는다. 검토·재작업 중인 CLI 워커는 같은 세션을 재사용하고, 결과 승인 후에는 기존 종료·정리 절차를 따른다.
-- 난이도는 파일 수만으로 정하지 않는다. 불명확한 요구, 넓은 영향 범위, 높은 위험이 있으면 총괄이 판단한다. 워커가 막히거나 범위 확대가 필요하면 근거를 받아 총괄이 재배분하며, 워커가 모델 선택·재위임·최종 승인을 맡지 않는다.
-- **검토는 총괄** — 모든 워커 결과와 관련 코드를 총괄이 확인한다. 필수 독립 리뷰 경계에서는 `gpt-6.1-sol`의 `xhigh` 새 `reviewer`가 검토하며, 기존 리뷰 재사용 규칙을 따른다. 워커의 자체 검사를 최종 리뷰로 대체하지 않는다. 사용량 절약을 이유로 필수 검사·독립 리뷰·승인 경계를 생략하지 않는다.
-- `planner`: `gpt-6.1-sol`이 `high`로 범위·역참조를 조사해 총괄에 보고한다. 계획과 최초 난이도 판정은 총괄이 작성한다. `reviewer`: `gpt-6.1-sol`의 `xhigh` 독립 검토. 정의는 `~/.codex/agents/`에 있다.
-- 감독 없는 전체 인계는 `orca-cli`의 Full Handoffs를 따른다. 아래 방식 질문과 `codex-worker` 감독 디스패치 규칙은 전체 인계에 적용하지 않는다.
-- **워크트리 분리** — 감독을 유지하며 다른 에이전트에 작업을 넘길 때 이미 지정·승인된 Orca worktree / in-place 위치를 재사용한다. 위치가 미정이고 선택이 결과에 영향을 주면 계획 확정 후 첫 디스패치 전에 묻는다. 선택이 불필요하면 사용 가능한 기존 위치를 쓴다. `orca status` 실패 시 지정 위치·격리 요구를 어기지 않는 경우에만 in-place로 진행한다. 결정은 작업 전체에 적용하며, 승인된 위치를 사용할 수 없고 대안이 결과를 바꾸면 다시 묻는다. 내가 직접 쓰는 격리 브랜치와 읽기 전용 리뷰는 이 질문의 대상이 아니다.
-- 자동 위임의 실행은 `codex-delegation`을 따른다. Orca 사용 시 선택한 체크아웃의 터미널을 분할해 워커의 모델·작업과 출력을 보여준다. 같은 체크아웃의 쓰기 워커는 한 번에 하나이며, 그동안 총괄은 같은 파일을 편집하지 않는다. 명시적인 `codex-worker` 전달자 요청은 해당 스킬의 별도 절차를 따른다. 다른 감독형 워커는 `orca-cli`의 Supervised Dispatch를 따른다.
+- Group related work in one worker to avoid duplicate reading. Handoffs contain only relevant scope, files, decisions, and verification results, not the entire conversation. Reuse the same CLI worker session during review/rework, then follow its completion and cleanup procedure after accepting the result.
+- Judge difficulty by ambiguity, impact, and risk, not file count alone. If a worker is blocked or scope must expand, the supervisor reallocates based on evidence. Workers do not choose models, re-delegate, or approve final results. Agent definitions are in `~/.codex/agents/`.
+- **검토는 총괄** — The supervisor checks every worker result and relevant code. At mandatory independent-review boundaries, use a fresh `reviewer` with the table's model/effort, unless a prior independent review qualifies for reuse under Approval and review boundaries. Worker self-checks do not replace final review. Subscription savings never waive required checks, independent review, or approval gates.
+- Full ownership handoffs without continued supervision follow `orca-cli` Full Handoffs; the supervised location-choice and `codex-worker` dispatch rules below do not apply to them.
+- **워크트리 분리** — For supervised delegation, reuse the specified/approved Orca worktree or in-place location. If location is undecided and the choice affects the result, ask after the plan is settled and before the first dispatch. Otherwise use an available existing location. If `orca status` fails, use in-place only when that preserves the specified location and isolation requirements. The decision applies to the whole task; ask again only if the approved location becomes unavailable and the alternative changes the result. This question does not apply to the supervisor's own isolated branch or read-only reviews.
+- Execute automatic delegation via `codex-delegation`. When using Orca, split a terminal in the selected checkout so the worker's model, task, and output are visible. Allow only one writing worker per checkout at a time; the supervisor must not edit the same files while it runs. Explicit `codex-worker` courier requests follow that skill's separate workflow. Other supervised workers follow `orca-cli` Supervised Dispatch.
 
 ## Context and documentation
 
-- 작업에 필요한 파일부터 읽는다. 설계·도메인·기존 결정이 관련되면 `~/.codex/rules/second-brain.md`를 참고한다. 작은 편집에 문서 전수 읽기를 요구하지 않는다.
-- 현재 동작은 코드와 실행 결과로 확인한다. 구현 명세는 의도와 배경을 파악하는 자료다.
-- 아키텍처·DB·API·업무 동작 변경 후 관련 `docs/` 파일과 갱신할 절을 제안한다. 사용자가 문서 변경까지 요청했거나 승인한 명세 수명주기에 포함되면 진행한다.
+- Read task-relevant files first. Consult `~/.codex/rules/second-brain.md` when design, domain context, or prior decisions matter; small edits do not require an exhaustive documentation read.
+- Establish current behavior from code and execution results; use implementation specs for intent and background.
+- After architecture, DB, API, or business-behavior changes, propose the relevant `docs/` files and sections to update. Apply those updates when the user requested documentation changes or the approved spec lifecycle includes them.

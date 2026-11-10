@@ -1,6 +1,9 @@
-# Artifact Report Format
+# Architecture Report Format
 
-The architectural review is published as a single Artifact page. Styling, theme tokens, and layout discipline come from the `artifact-design` skill; inline-SVG mechanics from `artifact-diagramming`. Artifacts render Mermaid natively via ```mermaid fences — no external scripts. Mermaid handles graph-shaped diagrams reliably; hand-built divs and inline SVG handle the more editorial visuals (mass diagrams, cross-sections). Mix the two — don't lean on Mermaid for everything, it'll start to look generic.
+Use one report with the structure below. For Markdown output, cards become sections and
+diagrams use Mermaid fences. For HTML or another available visual output, use its supported
+layout and drawing features. No external design skill is required. Choose a diagram only
+when it explains the candidate more clearly than short text.
 
 ## Structure
 
@@ -33,7 +36,8 @@ Pick the pattern that fits the candidate. Mix them. Don't make every diagram loo
 - **Mass diagram** (good for "interface as wide as implementation") — two rectangles per module: interface surface vs implementation. Shallow: nearly equal heights. Deep: short interface, tall implementation.
 - **Call-graph collapse** — before: a tree of calls as nested boxes. After: the same tree collapsed into one box, the now-internal calls faded inside it.
 
-Keep diagrams compact enough that before/after sits side by side without scrolling; wide content scrolls inside its own container per artifact rules. Module labels inside diagrams should read as schematic (small caps / letter-spaced), not as UI.
+Keep diagrams compact. Place before/after side by side when the output format supports it;
+otherwise stack them. Label modules with their actual names.
 
 ## Tone
 

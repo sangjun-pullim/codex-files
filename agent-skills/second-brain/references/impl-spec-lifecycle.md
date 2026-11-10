@@ -12,5 +12,5 @@ Durable why belongs in `ADR.md` (promote a genuine change of direction there whe
 
 - **Born**: `/impl-plan` creates the spec with the frontmatter block defined in that skill's `## Output Format`, plus the snapshot NOTE — `impl-plan` owns the field list; never restate it elsewhere. The block is required for every file **created** under `docs/impl-spec/`, including specs written ad-hoc (incident response, manual planning) without the skill — a newly created spec without it is a defect, same as an unstamped derivable doc. A spec that predates a later-added field is not a defect.
 - **Closed**: `/impl-execute` sets `status: done` and moves the file to `docs/impl-spec/archive/` on the conditions its Phase 3 step 1 defines — that skill owns them. A spec with unchecked steps stays `active` no matter how clean the review; it was never fully implemented.
-- **Superseded**: a new spec replacing an old one marks the old file `status: superseded-by: <NNN>` and archives it.
+- **Superseded**: a new spec replacing an old one marks the old file `status: "superseded-by: <NNN>"` and archives it.
 - **Reference rule**: only top-level (active) specs participate in planning/implementation routing. `archive/` is for archaeology — intent, background, rejected alternatives — and stays valid for that purpose at any age. Never cite an archived spec as evidence of current code state.

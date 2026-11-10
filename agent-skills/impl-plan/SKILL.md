@@ -1,6 +1,6 @@
 ---
 name: "impl-plan"
-description: "Create or verify an implementation plan when requested, or when AGENTS.md requires approval before implementation."
+description: "Create or verify an implementation plan when requested, or when AGENTS.md requires a plan before implementation."
 ---
 
 # Implementation Plan with Code-Verified Review Loop
@@ -46,9 +46,12 @@ in place; an old `tier` field can stay. For editing a step already marked `[x]`,
    across `docs/impl-spec/` and `docs/impl-spec/archive/` + 1, zero-padded to 3 digits; `001` if
    none. Create the directory if missing.
    - If this plan replaces an existing spec, set the old one's frontmatter to
-     `status: superseded-by: <new NNN>` and move it to `docs/impl-spec/archive/`.
+     `status: "superseded-by: <new NNN>"` and move it to `docs/impl-spec/archive/`.
 
 ## Phase 2: Review Loop
+
+Read [review workflow](~/.codex/rules/review-workflow.md) before this phase. It defines
+disposition, reproduction, scoped stops, and resume/closure; use it for every round.
 
 1. Reuse valid independent review evidence under AGENTS.md's review-reuse rule. When a new
    review is needed, spawn a **new** `reviewer` agent with the spec
@@ -60,8 +63,9 @@ in place; an old `tier` field can stay. For editing a step already marked `[x]`,
    | Finding | Severity | Disposition | Rationale |
    |---------|----------|-------------|-----------|
 
-3. Apply AGENTS.md **리뷰 정지** before any correction. Unless stopped, apply ACCEPTED
-   findings to the spec when editing is authorized. Record REJECTED findings with rationale
+3. Apply **리뷰 정지** from the review workflow before any correction. Apply ACCEPTED
+   findings outside the stopped/dependent scope when editing is authorized and independence
+   is established under that workflow. Record REJECTED findings with rationale
    in `## Review Notes`. In read-only reviews, leave the spec unchanged and present dispositions
    and proposed corrections in Phase 3; proposed corrections do not resolve open findings.
 4. **Exit, stop, and resume** follow AGENTS.md **리뷰 종료·재개** and **리뷰 정지**.
@@ -80,7 +84,7 @@ is already authorized and applicable approval gates are satisfied, continue with
 
 ```markdown
 ---
-status: active            # active | done | superseded-by: <NNN>
+status: active            # active | done | "superseded-by: <NNN>" (quote the entire value)
 date: <YYYY-MM-DD>
 risk-surface: <none | auth | payment | permission | db-schema | public-api>
 ---
@@ -117,7 +121,7 @@ Every step heading carries a progress marker: `[ ]` unstarted, `[x]` implemented
 - Code snippets where helpful
 
 ## Tests
-[Required. Name each test to add or change and the behavior it pins. When `risk-surface` is not
+[Required. Name existing tests to reuse and tests to add or change, with the behavior each verifies. When `risk-surface` is not
 `none`, "none needed" is not an available answer; off the risk surface it needs a reason.]
 
 ## Risks

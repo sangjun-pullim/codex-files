@@ -38,9 +38,9 @@ defaults to an audit. Follow AGENTS.md's independent review and permission bound
 
 Before any deep comparison: skip the files the `second-brain` skill exempts from stamping, and for the rest read the stamp it defines.
 
-- Stamp present → run `git diff --name-only <commit>..HEAD -- <globs>`.
-  - Empty diff → mark the doc **OK (stamp-verified)** and SKIP its deep comparison below.
-  - Non-empty diff → deep-compare ONLY against the changed files (the diff is the scope).
+- Stamp present → follow [freshness checks](../second-brain/references/freshness.md), the
+  canonical procedure for committed, staged, unstaged, and untracked source changes.
+  Only its **OK (stamp-verified)** outcome permits skipping the deep comparison below.
 - Stamp missing → full comparison as below, and suggest adding a stamp in the report.
 - In an authorized synchronization, update `verified-against` to the commit whose source
   state was verified. Do not stamp uncommitted source changes as verified against HEAD.

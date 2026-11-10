@@ -33,9 +33,11 @@ Then spawn a sub-agent to walk the codebase. Don't follow rigid heuristics — e
 
 Apply codebase-design's **deletion test** to anything you suspect is shallow — a "yes, concentrates" verdict is the signal you want.
 
-### 2. Present candidates as an Artifact report
+### 2. Present candidates as a report
 
-Publish the review as an Artifact. Load the `artifact-design` and `artifact-diagramming` skills before writing it — they govern styling, theming, and inline-SVG mechanics; Artifacts render Mermaid natively (```mermaid fences), so no external libraries are involved. If Artifact publishing is unavailable in the session, write the same report as a self-contained Markdown file in the OS temp directory instead and give the user the path.
+Use an available report-rendering capability when it fits the requested output. Otherwise
+write a self-contained Markdown report in the OS temp directory and give the user its path.
+Use Mermaid for relationships where useful. No additional design skill is a prerequisite.
 
 Render one card per candidate and a closing **Top recommendation** — [REPORT.md](REPORT.md) owns the card anatomy, report structure, diagram patterns, and vocabulary rules.
 
@@ -43,7 +45,8 @@ Render one card per candidate and a closing **Top recommendation** — [REPORT.m
 
 **Decision conflicts**: if a candidate contradicts an entry in `docs/ADR.md`, only surface it when the friction is real enough to warrant revisiting the decision. Mark it clearly in the card (e.g. a warning callout: _"contradicts the 2026-03 event-sourcing decision — but worth reopening because…"_). Don't list every theoretical refactor a past decision forbids.
 
-Do NOT propose interfaces yet. After publishing, give the user the Artifact link and ask: "Which of these would you like to explore?"
+Do NOT propose interfaces yet. After preparing the report, give the user its link or local
+path and ask: "Which of these would you like to explore?"
 
 ### 3. Grilling loop
 

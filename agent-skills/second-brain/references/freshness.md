@@ -17,8 +17,23 @@ sources: prisma/**, src/payment/**
 ---
 ```
 
-- `git diff --name-only <hash>..HEAD -- <globs>` empty → doc is fresh; no judgment needed.
-- Non-empty → potentially stale; the diff IS the sync-check scope.
+- Validate that the stamp names an available commit and `sources` covers the documented facts.
+  Missing/invalid commits or incomplete source coverage require a full comparison.
+- For valid stamps, collect the union of changed paths from these commands, passing each
+  source glob as a separate quoted Git pathspec:
+  - `git diff --no-renames --name-only <hash> HEAD -- <globs>` (committed changes)
+  - `git diff --cached --no-renames --name-only HEAD -- <globs>` (staged changes)
+  - `git diff --no-renames --name-only -- <globs>` (unstaged changes)
+  - `git ls-files --others --exclude-standard -- <globs>` (untracked sources)
+  `--no-renames` includes both old and new paths. Use `-z` and NUL-aware processing when
+  collecting paths programmatically.
+- Only successful checks with an empty union permit **OK (stamp-verified)**. Errors are
+  not empty results. A non-empty union requires comparison against the affected current
+  sources and relevant dependent facts; inspect staged content too when it differs from
+  the working tree. Deletions and renames must be reflected in the documentation.
+- Update the stamp only when the verified source state is represented by that commit.
+  Relevant staged, unstaged, or untracked changes prevent a HEAD stamp; report the dirty
+  source state instead. Changes outside the document's source scope do not prevent stamping.
 - `/docs-sync` uses stamps for incremental checking and bumps them after a confirmed sync.
 - When reading a stamped doc for derivable facts, trust it only if the stamp check passes; otherwise verify against code.
 - Harness protocol files under `~/.codex/docs/**` are hand-written-layer by definition — they describe procedure, not code — so they take no stamp either.
