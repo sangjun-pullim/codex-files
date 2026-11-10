@@ -34,12 +34,16 @@ defaults to an audit. Follow AGENTS.md's independent review and permission bound
 
 ## Part 3: docs/ Content Sync
 
+Apply the [evidence rules](../second-brain/references/document-formats.md#evidence-for-intent-and-current-behavior)
+before deciding whether a discrepancy calls for a documentation correction or an implementation finding.
+
 ### Incremental mode (stamp-based — check FIRST)
 
-Before any deep comparison: skip the files the `second-brain` skill exempts from stamping, and for the rest read the stamp it defines.
+Files exempt from stamping use the applicable full comparison below without a stamp.
+For code-derived docs, read the stamp before deep comparison.
 
 - Stamp present → follow [freshness checks](../second-brain/references/freshness.md), the
-  canonical procedure for committed, staged, unstaged, and untracked source changes.
+  canonical procedure for document identity and committed, staged, unstaged, and untracked source changes.
   Only its **OK (stamp-verified)** outcome permits skipping the deep comparison below.
 - Stamp missing → full comparison as below, and suggest adding a stamp in the report.
 - In an authorized synchronization, update `verified-against` to the commit whose source
@@ -63,7 +67,7 @@ For each docs/ file not cleared by its stamp, compare its content against the ac
 12. **BUSINESS-LOGIC.md** ↔ 도메인 서비스/워크플로우
     - 문서화된 비즈니스 규칙이 현재 구현과 일치하는지
 
-존재하지 않는 docs/ 파일은 건너뛴다. 드리프트 발견 시 **구체적으로 어떤 내용을 추가/수정/삭제해야 하는지** 제안한다.
+존재하지 않는 docs/ 파일은 건너뛴다. 드리프트의 종류와 근거를 보고하고, 위 evidence rules에 따라 문서 수정 대상인 내용만 구체적인 추가/수정/삭제를 제안한다.
 
 ## Part 4: impl-spec Lifecycle Hygiene
 

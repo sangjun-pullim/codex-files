@@ -45,8 +45,9 @@ in place; an old `tier` field can stay. For editing a step already marked `[x]`,
 3. **Save** to `docs/impl-spec/<NNN>-<short-description>.md`. `NNN` = highest existing number
    across `docs/impl-spec/` and `docs/impl-spec/archive/` + 1, zero-padded to 3 digits; `001` if
    none. Create the directory if missing.
-   - If this plan replaces an existing spec, set the old one's frontmatter to
-     `status: "superseded-by: <new NNN>"` and move it to `docs/impl-spec/archive/`.
+   - If this plan replaces an existing spec, record the old spec's path and the pending
+     replacement in the new spec's `## Review Notes`. Keep the old spec active until the
+     replacement transition in Phase 3; a pending replacement is not ready for implementation.
 
 ## Phase 2: Review Loop
 
@@ -75,6 +76,14 @@ disposition, reproduction, scoped stops, and resume/closure; use it for every ro
    follow `/impl-execute`'s Inputs.
 
 ## Phase 3: Present
+
+For an authorized replacement, after Phase 2 exits successfully and no applicable approval
+boundary remains, set the old spec to `status: "superseded-by: <new NNN>"`, move it to
+`docs/impl-spec/archive/`, and replace the pending note with the adoption record in the new
+spec's `## Review Notes`.
+If review stops or a decision remains unresolved, leave the old spec active and the replacement
+pending. Retire the old spec earlier only when the user explicitly requested its immediate
+retirement. A review-only request does not change either spec.
 
 Present the spec path, the risk surface, findings, applied or proposed corrections, and any
 remaining MEDIUM/LOW notes and REJECTED findings with their rationale. For a review-only or planning-only request, finish after presenting the report. If implementation

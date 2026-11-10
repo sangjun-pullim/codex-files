@@ -11,7 +11,7 @@ The **Layer** column decides stamping: derivable-layer docs carry a freshness st
 | `PRD.md` | hand-written | Product requirements — what we're building, what we're not, and why (see PRD section below) | Product documentation requested or approved |
 | `ARCHITECTURE.md` | derivable | High-level map — module boundaries, integration points, data flow (not an exhaustive structure listing) | Always |
 | `DB-SCHEMA.md` | derivable | Modeling rationale, constraints, migration notes (the schema itself lives in `schema.prisma`) | Prisma/DB projects |
-| `API-SPEC.md` | derivable | External API contract — the contract is the truth, not the code | APIs with external consumers (internal-only: route code is the doc) |
+| `API-SPEC.md` | derivable | Observed API surface and confirmed external contract; the contract governs intended behavior | APIs with external consumers (internal-only: route code is the doc) |
 | `FRONTEND-ARCHITECTURE.md` | derivable | Component tree, state management, routing | React/Next.js projects |
 | `BUSINESS-LOGIC.md` | hand-written | Domain rules, workflows, edge cases — intended behavior, the baseline for judging bugs | Complex business logic |
 | `ADR.md` | hand-written | ADR (Architecture Decision Records) | Always |
@@ -22,6 +22,19 @@ The **Layer** column decides stamping: derivable-layer docs carry a freshness st
 project meta-docs, and the one deliberate exception to the global `AGENTS.md` file naming rule.
 Legacy lowercase names (`decisions.md`, `glossary.md`, …) are the same docs: read them
 wherever the uppercase name is named; `/docs-sync` proposes migrating them.
+
+## Evidence for intent and current behavior
+
+Code and execution establish observed behavior, not intended business rules or external
+commitments. For intended rules in `BUSINESS-LOGIC.md` and contractual claims in `API-SPEC.md`,
+cite applicable user requirements, approved specs, or decision records. Keep code-only
+observations separate and mark their intended rule or contract `미확인` when that evidence
+is missing; do not promote an observed implementation into a requirement.
+
+When implementation contradicts confirmed intent, report an implementation discrepancy.
+Documentation synchronization alone does not authorize changing that intent or fixing code.
+Update intended rules only with evidence of changed intent and within the authorized scope.
+Freshness stamps verify code-derived facts only, including in documents that also state intent.
 
 
 ## PRD.md — What We're Building

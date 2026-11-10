@@ -13,9 +13,15 @@ assembly and completion rules in steps 4 and 6. Phase references below point to
    owns, the `## Tests` entries for those steps quoted verbatim, and both `<base>` (return branch)
    and `<base-commit>` (fixed task starting commit). Workers never write
    the spec; you flip markers after gating. In-place mode: one worker at a time.
-3. **Gate each report mechanically** (no diff review here): `codex 호출 0회` or no session id →
-   failed, re-dispatch; any `검증 → exit` non-zero → send the failing output back as a rework
-   request to the same session; `스펙 외 변경 파일` non-empty → inspect those paths; orca mode →
+3. **Gate each report**: `codex 호출 0회` or no session id → failed, re-dispatch.
+   For each failed verification, the supervisor determines whether the check is required
+   and whether this task caused the failure, using the spec, project requirements, and
+   baseline evidence. Send task-caused failures to the same session for rework. Required
+   check failures remain blockers even when pre-existing; do not expand scope to fix unrelated
+   problems. An optional check's failure proven pre-existing and unrelated is a reported
+   follow-up, not a rework request or blocker. Investigate uncertain attribution before
+   accepting the result. The worker still reports facts in its existing format.
+   `스펙 외 변경 파일` non-empty → inspect those paths; orca mode →
    `git -C <worktree> log <base-commit>..HEAD` must be non-empty (commit a dirty worktree there
    yourself — that is assembly, not implementation). After two failures of the same check,
    stop repeating the same approach. Inspect the evidence; a new, concrete cause can justify

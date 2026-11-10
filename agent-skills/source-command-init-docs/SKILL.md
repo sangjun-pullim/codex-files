@@ -41,6 +41,10 @@ Before creating each standard file, check if a similar file already exists:
 
 Before writing any docs, thoroughly explore the project to gather real content:
 
+For business rules and API contracts, apply the
+[evidence rules](../second-brain/references/document-formats.md#evidence-for-intent-and-current-behavior)
+to distinguish observed behavior from confirmed intent.
+
 - **ARCHITECTURE.md**: Read `AGENTS.md`, `package.json`, key entry points (`src/main.ts`, `src/app.module.ts`, etc.), and module directories. Identify modules, their responsibilities, data flow, and external integrations.
 - **DB-SCHEMA.md**: Read `prisma/schema.prisma`. Extract all models, relations, indexes, enums, and notable `@map`/`@@map` mappings.
 - **API-SPEC.md**: Find all controllers/routes. Extract endpoints, HTTP methods, request/response DTOs, guards, and decorators.
@@ -51,7 +55,7 @@ Before writing any docs, thoroughly explore the project to gather real content:
 - **PRD.md**: do NOT derive from code — intent is not in the code. Create `docs/PRD.md` with the section headings from the `second-brain` skill only and leave the content to the user; suggest a `grilling` session to fill it if the product intent is unclear.
 - **GLOSSARY.md**: Collect domain terms from model names, service names, and AGENTS.md; map each business term to its canonical code identifier with a one-line definition and banned aliases (format in the `second-brain` skill). Only include terms with real confusion potential — never pad with obvious vocabulary.
 
-Use the Explore agent or parallel search agents to gather information efficiently. Do NOT guess — only document what you can confirm from the code.
+Use the Explore agent or parallel search agents to gather information efficiently. Do NOT guess — document only supported claims under the evidence rules above.
 
 ## Step 5: Create and Populate Files
 

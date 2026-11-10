@@ -22,6 +22,8 @@ Codex) carries the blind spot this loop exists to defeat.
 - Spec path (`docs/impl-spec/<NNN>-*.md`). Reuse the plan already selected in the
   conversation. Otherwise inspect active top-level specs and use the unique relevant plan;
   ask only when multiple plausible plans remain. Selection does not itself grant approval.
+  A replacement still marked pending in `## Review Notes` must complete
+  [`impl-plan` Phase 3](../impl-plan/SKILL.md#phase-3-present) before execution.
 - If `## Review Notes` has `UNRESOLVED` rows, block ordinary execution. Scoped continuation
   of an active implementation-review loop follows Phase 2 and the review workflow; it is
   not a restart or permission to implement an unresolved plan. Resolve plan-review
