@@ -32,6 +32,9 @@ Personal Codex instructions. Maintain this file and `~/.codex/agent-skills/` dir
 
 ## Verification
 
+- Before changing behavior, state what the caller or user should observe. Verify that outcome through the affected entry point, reusing existing checks when they exercise that path and assert the outcome.
+- For bugs, trace the failing path to the first point where behavior diverges from the expected result. If the reason for existing behavior is unclear, consult relevant commits or PRs before changing it and distinguish recorded intent from inference.
+- If two attempted fixes based on the same assumption fail, state the assumption and check it directly before trying another fix.
 - For new or changed behavior, first check whether existing tests exercise the required outcome and affected paths. Reuse adequate coverage; add or update tests for gaps rather than duplicating it. For bug fixes, run a failing reproduction test before correcting code; write or extend one when existing tests do not reproduce the defect. Reviewer findings additionally follow **동작 지적의 재현** and **리뷰 정지**. Follow existing test naming; otherwise default to `should + behavior`.
 - Do not add wording snapshot tests for edits that do not change behavior, such as typos, documentation, or formatting.
 - Use existing runners and fixtures; mock or isolate external dependencies. If tests are required but no runner exists, provide the smallest suitable test.
