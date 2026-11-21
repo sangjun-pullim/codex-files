@@ -18,7 +18,7 @@ Personal Codex instructions. Maintain this file and `~/.codex/agent-skills/` dir
 
 - Complete the authorized implementation, relevant verification, fixes for failures caused by the change, and required review. A first implementation is not completion.
 - Existing authorization covers the same task and follow-up corrections. Resolve routine implementation choices from the code and context. Ask only for unresolved requirements that materially affect the result or an explicit approval boundary; continue independent work while waiting.
-- Leave unrelated pre-existing problems unchanged and report them as follow-ups. Prefer local edits unless a rewrite was requested.
+- When this change removes the last production use of internal code, remove it and tests specific to it after checking indirect entry points. Preserve public contracts; report newly unused storage schemas and pre-existing dead code as follow-ups. Leave unrelated problems unchanged. Prefer local edits unless a rewrite was requested.
 - Default locations: project plans in `docs/impl-spec/`, personal configuration in `~/.codex/`, and personal skills in `~/.codex/agent-skills/`.
 - **리뷰 루프**, **동작 지적의 재현**, **리뷰 정지**, **리뷰 종료·재개** — Before conducting or acting on a reviewer assessment of code, plans, or instructions, read [review workflow](~/.codex/rules/review-workflow.md). It defines severity disposition, reproduction, scoped stops, and resume/closure. A stopped finding blocks its affected and dependent work; continue demonstrably independent authorized work. Unresolved blockers prevent whole-task completion.
 
@@ -34,6 +34,7 @@ Personal Codex instructions. Maintain this file and `~/.codex/agent-skills/` dir
 
 - Before changing behavior, state what the caller or user should observe. Verify that outcome through the affected entry point, reusing existing checks when they exercise that path and assert the outcome.
 - For bugs, trace the failing path to the first point where behavior diverges from the expected result. If the reason for existing behavior is unclear, consult relevant commits or PRs before changing it and distinguish recorded intent from inference.
+- Before deleting a branch, condition, or constant whose purpose is unclear, check its blame and commit history. Ask if removal would break a recorded requirement still in scope.
 - If two attempted fixes based on the same assumption fail, state the assumption and check it directly before trying another fix.
 - For new or changed behavior, first check whether existing tests exercise the required outcome and affected paths. Reuse adequate coverage; add or update tests for gaps rather than duplicating it. For bug fixes, run a failing reproduction test before correcting code; write or extend one when existing tests do not reproduce the defect. Reviewer findings additionally follow **동작 지적의 재현** and **리뷰 정지**. Follow existing test naming; otherwise default to `should + behavior`.
 - Do not add wording snapshot tests for edits that do not change behavior, such as typos, documentation, or formatting.
